@@ -18,7 +18,7 @@ import {
   BackgroundVariant,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Play, Loader2, ArrowLeft, Zap, GitBranch, Brain, ShieldCheck } from "lucide-react";
+import { Play, Loader2, ArrowLeft, Zap, GitBranch, Brain, ShieldCheck, AlertTriangle, FileText } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -40,13 +40,64 @@ interface TemplateData {
 
 const nodeTypes = { workflowNode: WorkflowNode };
 
-function layoutNodes(configNodes: TemplateConfig["nodes"]): Node[] {
-  const SPACING_Y = 100;
-  const CENTER_X = 300;
-  return configNodes.map((n, i) => ({
+function layoutNodes(
+  configNodes: TemplateConfig["nodes"],
+  configEdges: TemplateConfig["edges"]
+): Node[] {
+  const SPACING_X = 220;
+  const SPACING_Y = 110;
+  const BASE_X = 300;
+
+  const childMap = new Map<string, string[]>();
+  const parentMap = new Map<string, string[]>();
+  for (const e of configEdges) {
+    childMap.set(e.source, [...(childMap.get(e.source) ?? []), e.target]);
+    parentMap.set(e.target, [...(parentMap.get(e.target) ?? []), e.source]);
+  }
+
+  const roots = configNodes.filter((n) => !(parentMap.get(n.id)?.length));
+  const positions = new Map<string, { x: number; y: number }>();
+  const visited = new Set<string>();
+
+  const queue: Array<{ id: string; depth: number; lane: number }> = [];
+  for (const r of roots) queue.push({ id: r.id, depth: 0, lane: 0 });
+
+  const depthSlots = new Map<number, number>();
+
+  while (queue.length > 0) {
+    const { id, depth } = queue.shift()!;
+    if (visited.has(id)) continue;
+    visited.add(id);
+
+    const slot = depthSlots.get(depth) ?? 0;
+    depthSlots.set(depth, slot + 1);
+
+    const siblings = configNodes.filter(
+      (n) => !visited.has(n.id) && parentMap.get(n.id)?.some((p) => childMap.get(p)?.includes(n.id) && childMap.get(p)?.includes(id))
+    );
+    const totalAtDepth = Math.max(1, slot + 1 + siblings.length);
+    const xOffset = (slot - (totalAtDepth - 1) / 2) * SPACING_X;
+
+    positions.set(id, { x: BASE_X + xOffset, y: depth * SPACING_Y + 50 });
+
+    const children = childMap.get(id) ?? [];
+    for (let i = 0; i < children.length; i++) {
+      if (!visited.has(children[i])) {
+        queue.push({ id: children[i], depth: depth + 1, lane: i });
+      }
+    }
+  }
+
+  for (const n of configNodes) {
+    if (!positions.has(n.id)) {
+      positions.set(n.id, { x: BASE_X, y: configNodes.indexOf(n) * SPACING_Y + 50 });
+    }
+  }
+
+  return configNodes.map((n) => ({
     id: n.id,
     type: "workflowNode",
-    position: { x: CENTER_X, y: i * SPACING_Y + 50 },
+    position: positions.get(n.id)!,
     data: { label: n.label, nodeType: n.type, status: "idle", config: n.config },
   }));
 }
@@ -83,7 +134,7 @@ export function WorkflowBuilderContent() {
   });
 
   const initialNodes = useMemo(
-    () => (template ? layoutNodes(template.configJson.nodes) : []),
+    () => (template ? layoutNodes(template.configJson.nodes, template.configJson.edges) : []),
     [template]
   );
   const initialEdges = useMemo(
@@ -228,8 +279,16 @@ export function WorkflowBuilderContent() {
           <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--text-muted)]">Policy</span>
         </div>
         <div className="flex items-center gap-1.5">
+          <AlertTriangle className="h-3 w-3 text-amber-400" />
+          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--text-muted)]">Approval</span>
+        </div>
+        <div className="flex items-center gap-1.5">
           <Play className="h-3 w-3 text-[var(--success)]" />
           <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--text-muted)]">Execute</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <FileText className="h-3 w-3 text-[var(--text-muted)]" />
+          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--text-muted)]">Audit</span>
         </div>
       </div>
 
