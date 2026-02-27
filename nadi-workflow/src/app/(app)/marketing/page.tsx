@@ -1,10 +1,9 @@
 "use client";
 
-import { Calendar, ImagePlus, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Calendar, ImagePlus } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusChip } from "@/components/shared/status-chip";
 
-const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const WEEKLY_PLAN = [
   { day: "Mon", content: "Product spotlight: Gula Aren Latte 1L", channel: "Instagram", status: "published", type: "Image Post" },

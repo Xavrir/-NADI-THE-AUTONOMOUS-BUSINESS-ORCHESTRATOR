@@ -5,7 +5,6 @@ export async function GET() {
   const [
     pendingApprovals,
     pendingReviews,
-    openTasks,
     recentAudit,
     lowStockItems,
     ledgerEntries,
@@ -13,7 +12,6 @@ export async function GET() {
   ] = await Promise.all([
     prisma.approval.count({ where: { status: "pending" } }),
     prisma.reviewItem.count({ where: { status: "pending" } }),
-    prisma.task.count({ where: { status: "open" } }),
     prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
     prisma.inventory.findMany({
       where: { available: { lte: 10 } },

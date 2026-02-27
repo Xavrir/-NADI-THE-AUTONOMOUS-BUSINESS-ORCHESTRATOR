@@ -1,6 +1,6 @@
 "use client";
 
-import { Headphones, Clock, CheckCircle2, AlertTriangle, ArrowUpRight } from "lucide-react";
+import { Headphones, Clock, AlertTriangle, ArrowUpRight } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusChip } from "@/components/shared/status-chip";
 

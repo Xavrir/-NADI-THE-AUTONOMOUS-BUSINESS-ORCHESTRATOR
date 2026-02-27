@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { StatusChip } from "@/components/shared/status-chip";
 import { EvidenceChip } from "@/components/shared/evidence-chip";
 import { DetailsDrawer, useDrawer } from "@/components/shared/details-drawer";
-import { formatIDR } from "@/lib/utils";
 
 interface Approval {
   id: string;
