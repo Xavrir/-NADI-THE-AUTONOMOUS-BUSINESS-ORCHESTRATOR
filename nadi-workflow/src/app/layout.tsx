@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryProvider } from "@/providers/query-provider";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -38,7 +39,9 @@ export default function RootLayout({
       <body
         className={`${bricolage.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} antialiased`}
       >
-        <TooltipProvider>{children}</TooltipProvider>
+        <QueryProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </QueryProvider>
       </body>
     </html>
   );
