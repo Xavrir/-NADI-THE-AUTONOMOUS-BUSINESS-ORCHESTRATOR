@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -94,7 +94,7 @@ export function WorkflowBuilderContent() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-  useMemo(() => {
+  useEffect(() => {
     if (initialNodes.length > 0) {
       setNodes(initialNodes);
       setEdges(initialEdges);
@@ -233,8 +233,8 @@ export function WorkflowBuilderContent() {
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden rounded-sm border border-[var(--border)]" style={{ height: "calc(100vh - 252px)" }}>
-        <div className="flex-1">
+      <div className="flex overflow-hidden rounded-sm border border-[var(--border)]" style={{ height: "calc(100vh - 252px)" }}>
+        <div style={{ width: "100%", height: "100%", flex: 1 }}>
           <ReactFlow
             nodes={nodes}
             edges={edges}
