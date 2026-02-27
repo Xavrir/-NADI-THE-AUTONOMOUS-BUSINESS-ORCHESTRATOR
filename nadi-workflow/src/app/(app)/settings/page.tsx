@@ -74,7 +74,7 @@ export default function SettingsPage() {
                 return (
                   <div
                     key={conn.id}
-                    className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5 space-y-4"
+                    className="card-elevated p-5 space-y-4"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
@@ -126,9 +126,9 @@ export default function SettingsPage() {
         {/* System info */}
         <section>
           <h2 className="mb-4 text-sm font-medium text-[var(--text-primary)]">System</h2>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-[var(--text-muted)]">Database</span>
+            <div className="card-elevated p-5 space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-[var(--text-muted)]">Database</span>
               <span className="font-mono text-[var(--text-secondary)]">SQLite (dev)</span>
             </div>
             <div className="flex justify-between text-sm">

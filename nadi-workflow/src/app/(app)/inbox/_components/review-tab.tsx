@@ -59,7 +59,7 @@ export function ReviewTab() {
 
   if (items.length === 0) {
     return (
-      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-12 text-center">
+      <div className="card-elevated p-12 text-center">
         <p className="text-sm text-[var(--text-muted)]">No items to review</p>
       </div>
     );
@@ -70,7 +70,7 @@ export function ReviewTab() {
       {items.map((item) => (
         <div
           key={item.id}
-          className="flex items-center gap-4 rounded-lg border border-[var(--border)] bg-[var(--card)] p-4"
+          className="flex items-center gap-4 card-elevated border-l-2 border-l-[var(--warning)] p-4"
         >
           <div className="flex-1 space-y-1">
             <div className="flex items-center gap-2">

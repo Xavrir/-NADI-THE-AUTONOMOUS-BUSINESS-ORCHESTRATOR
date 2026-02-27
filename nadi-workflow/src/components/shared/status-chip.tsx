@@ -6,23 +6,23 @@ import { cn } from "@/lib/utils";
 const variants = {
   success: {
     icon: CheckCircle2,
-    className: "border-[var(--success-muted)] bg-[var(--success-muted)]/20 text-[var(--success)]",
+    className: "border-emerald-500/20 bg-emerald-500/10 text-[var(--success)]",
   },
   warning: {
     icon: AlertTriangle,
-    className: "border-[var(--warning-muted)] bg-[var(--warning-muted)]/20 text-[var(--warning)]",
+    className: "border-amber-500/20 bg-amber-500/10 text-[var(--warning)]",
   },
   danger: {
     icon: XCircle,
-    className: "border-[var(--danger-muted)] bg-[var(--danger-muted)]/20 text-[var(--danger)]",
+    className: "border-red-500/20 bg-red-500/10 text-[var(--danger)]",
   },
   info: {
     icon: Info,
-    className: "border-[var(--info-muted)] bg-[var(--info-muted)]/20 text-[var(--info)]",
+    className: "border-blue-500/20 bg-blue-500/10 text-[var(--info)]",
   },
   neutral: {
     icon: Circle,
-    className: "border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)]",
+    className: "border-white/10 bg-white/5 text-[var(--text-muted)]",
   },
 } as const;
 

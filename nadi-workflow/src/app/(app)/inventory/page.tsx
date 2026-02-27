@@ -110,21 +110,21 @@ export default function InventoryPage() {
 
       <div className="space-y-4">
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
+          <div className="card-elevated p-3">
             <div className="flex items-center gap-2">
               <Package className="h-4 w-4 text-[var(--primary)]" />
               <p className="text-xs text-[var(--text-muted)]">Total SKUs</p>
             </div>
             <p className="mt-1 font-mono text-xl font-bold text-[var(--text-primary)]">{rows.length}</p>
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
+          <div className="card-elevated p-3">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-[var(--warning)]" />
               <p className="text-xs text-[var(--text-muted)]">Low Stock</p>
             </div>
             <p className="mt-1 font-mono text-xl font-bold text-[var(--warning)]">{lowStockCount}</p>
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
+          <div className="card-elevated p-3">
             <div className="flex items-center gap-2">
               <TrendingDown className="h-4 w-4 text-[var(--danger)]" />
               <p className="text-xs text-[var(--text-muted)]">Critical</p>

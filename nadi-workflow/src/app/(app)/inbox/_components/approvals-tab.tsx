@@ -64,7 +64,7 @@ export function ApprovalsTab() {
 
   if (approvals.length === 0) {
     return (
-      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-12 text-center">
+      <div className="card-elevated p-12 text-center">
         <p className="text-sm text-[var(--text-muted)]">No approvals pending</p>
       </div>
     );
@@ -76,7 +76,7 @@ export function ApprovalsTab() {
         {approvals.map((approval) => (
           <div
             key={approval.id}
-            className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4"
+            className="card-elevated border-l-2 border-l-[var(--primary)] p-4"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-2">
@@ -155,7 +155,7 @@ export function ApprovalsTab() {
               <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
                 Before
               </h4>
-              <pre className="rounded bg-[var(--background)] p-3 text-xs text-[var(--text-secondary)] overflow-x-auto font-mono">
+              <pre className="rounded-xl border border-red-500/10 bg-red-500/[0.03] p-3 text-xs text-[var(--text-secondary)] overflow-x-auto font-mono">
                 {JSON.stringify(activeApproval.beforeJson, null, 2)}
               </pre>
             </div>
@@ -163,7 +163,7 @@ export function ApprovalsTab() {
               <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
                 After
               </h4>
-              <pre className="rounded bg-[var(--background)] p-3 text-xs text-[var(--text-secondary)] overflow-x-auto font-mono">
+              <pre className="rounded-xl border border-emerald-500/10 bg-emerald-500/[0.03] p-3 text-xs text-[var(--text-secondary)] overflow-x-auto font-mono">
                 {JSON.stringify(activeApproval.afterJson, null, 2)}
               </pre>
             </div>

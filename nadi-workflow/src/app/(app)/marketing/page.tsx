@@ -1,18 +1,26 @@
 "use client";
 
-import { Calendar, ImagePlus } from "lucide-react";
+import { useState } from "react";
+import { Calendar as CalendarIcon, ImagePlus, ChevronLeft, ChevronRight, Plus, ExternalLink } from "lucide-react";
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay } from "date-fns";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusChip } from "@/components/shared/status-chip";
+import { Button } from "@/components/ui/button";
 
+// Mocking "today" as March 25, 2026 to match the previous demo context
+const DEMO_TODAY = new Date(2026, 2, 25); 
 
-const WEEKLY_PLAN = [
-  { day: "Mon", content: "Product spotlight: Gula Aren Latte 1L", channel: "Instagram", status: "published", type: "Image Post" },
-  { day: "Tue", content: "Behind the scenes: roasting process", channel: "TikTok", status: "published", type: "Short Video" },
-  { day: "Wed", content: "Customer review highlight", channel: "Instagram Stories", status: "scheduled", type: "Story Carousel" },
-  { day: "Thu", content: "Flash promo: 15% off Americano Iced", channel: "Shopee", status: "scheduled", type: "Promo Banner" },
-  { day: "Fri", content: "Weekend bundle: Kopi Susu + Matcha Latte", channel: "Tokopedia", status: "draft", type: "Listing Update" },
-  { day: "Sat", content: "Barista tip of the week", channel: "Instagram Reels", status: "draft", type: "Short Video" },
-  { day: "Sun", content: "Week recap + next week teaser", channel: "WhatsApp Broadcast", status: "pending", type: "Text + Image" },
+const MOCK_EVENTS = [
+  { id: 1, date: new Date(2026, 2, 23), content: "Product spotlight", channel: "IG", status: "published", type: "Image" },
+  { id: 2, date: new Date(2026, 2, 24), content: "Roasting process", channel: "TikTok", status: "published", type: "Video" },
+  { id: 3, date: new Date(2026, 2, 25), content: "Customer review", channel: "IG Story", status: "scheduled", type: "Carousel" },
+  { id: 4, date: new Date(2026, 2, 26), content: "15% off Americano", channel: "Shopee", status: "scheduled", type: "Banner" },
+  { id: 5, date: new Date(2026, 2, 27), content: "Weekend bundle", channel: "Tokopedia", status: "draft", type: "Listing" },
+  { id: 6, date: new Date(2026, 2, 28), content: "Barista tip", channel: "IG Reels", status: "draft", type: "Video" },
+  { id: 7, date: new Date(2026, 2, 29), content: "Week recap", channel: "WhatsApp", status: "pending", type: "Text" },
+  { id: 8, date: new Date(2026, 2, 5), content: "Payday Promo", channel: "All", status: "published", type: "Campaign" },
+  { id: 9, date: new Date(2026, 3, 2), content: "Ramadan Teaser", channel: "IG", status: "draft", type: "Image" },
+  { id: 10, date: new Date(2026, 1, 14), content: "Valentine's Special", channel: "TikTok", status: "published", type: "Video" },
 ];
 
 const CONTENT_PACKS = [
@@ -21,7 +29,7 @@ const CONTENT_PACKS = [
   { title: "New Product Launch: Oat Latte", items: 5, status: "draft", description: "Launch week content for all channels" },
 ];
 
-const statusColors: Record<string, { variant: "success" | "warning" | "info" | "neutral"; label: string }> = {
+const statusColors: Record<string, { variant: "success" | "warning" | "info" | "neutral" | "danger"; label: string }> = {
   published: { variant: "success", label: "Published" },
   scheduled: { variant: "info", label: "Scheduled" },
   draft: { variant: "neutral", label: "Draft" },
@@ -31,63 +39,138 @@ const statusColors: Record<string, { variant: "success" | "warning" | "info" | "
 };
 
 export default function MarketingPage() {
+  const [currentDate, setCurrentDate] = useState(DEMO_TODAY);
+
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(monthStart);
+  // weekStartsOn: 1 means Monday
+  const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
+  const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
+
+  const dateFormat = "d";
+  const days = eachDayOfInterval({ start: startDate, end: endDate });
+
+  const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
+  const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
+  const goToToday = () => setCurrentDate(DEMO_TODAY);
+
+  const weekDays = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
   return (
     <div>
       <PageHeader
-        title="Marketing"
-        subtitle="Weekly content calendar and content packs"
+        title="Marketing Planner"
+        subtitle={format(currentDate, "MMMM yyyy")}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={prevMonth} className="h-8 w-8 rounded-none border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors"><ChevronLeft className="h-4 w-4" /></Button>
+            <Button variant="outline" size="sm" onClick={goToToday} className="h-8 rounded-none border-[var(--border)] font-mono text-xs font-bold uppercase tracking-wider hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors">Today</Button>
+            <Button variant="outline" size="icon" onClick={nextMonth} className="h-8 w-8 rounded-none border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors"><ChevronRight className="h-4 w-4" /></Button>
+            <Button size="sm" className="ml-2 btn-glow h-8 rounded-none bg-[var(--primary)] text-[#000] gap-1 font-bold">
+              <Plus className="h-3.5 w-3.5" />
+              New Campaign
+            </Button>
+          </div>
+        }
       />
 
-      <div className="space-y-6">
-        {/* Weekly Calendar */}
+      <div className="space-y-8">
+        {/* Calendar Grid */}
         <section>
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
-            <Calendar className="h-4 w-4 text-[var(--primary)]" />
-            This Week
-          </h2>
-          <div className="grid gap-3 md:grid-cols-7">
-            {WEEKLY_PLAN.map((item) => {
-              const st = statusColors[item.status] ?? statusColors.draft;
-              return (
-                <div
-                  key={item.day}
-                  className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3 space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase text-[var(--primary)]">{item.day}</span>
-                    <StatusChip variant={st.variant} label={st.label} />
-                  </div>
-                  <p className="text-sm font-medium text-[var(--text-primary)] leading-tight">{item.content}</p>
-                  <div className="space-y-0.5">
-                    <p className="text-xs text-[var(--text-muted)]">{item.channel}</p>
-                    <p className="text-xs text-[var(--text-muted)]">{item.type}</p>
-                  </div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[var(--text-primary)] font-display">
+              <CalendarIcon className="h-4 w-4 text-[var(--primary)]" />
+              {format(currentDate, "MMMM yyyy")} Calendar
+            </h2>
+          </div>
+          
+          <div className="rounded-sm border border-[var(--border)] bg-[var(--surface)] overflow-hidden card-elevated">
+            {/* Weekday headers */}
+            <div className="grid grid-cols-7 border-b border-[var(--border)] bg-[var(--card)]">
+              {weekDays.map((day) => (
+                <div key={day} className="p-2 text-center border-r border-[var(--border)] last:border-r-0">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">{day}</div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
+            
+            {/* Days grid */}
+            <div className="grid grid-cols-7 auto-rows-fr">
+              {days.map((day, i) => {
+                const isCurrentMonth = isSameMonth(day, monthStart);
+                const isDemoToday = isSameDay(day, DEMO_TODAY);
+                const dayEvents = MOCK_EVENTS.filter(e => isSameDay(e.date, day));
+                
+                return (
+                  <div 
+                    key={day.toString()} 
+                    className={`min-h-[120px] p-1.5 border-b border-r border-[var(--border)] group relative
+                      ${i % 7 === 6 ? 'border-r-0' : ''} 
+                      ${i >= days.length - 7 ? 'border-b-0' : ''}
+                      ${!isCurrentMonth ? 'bg-[var(--background)] opacity-50' : 'bg-[var(--surface)] hover:bg-[var(--primary)]/[0.02]'}
+                    `}
+                  >
+                    <div className="flex justify-between items-start mb-1.5">
+                      <span className={`font-mono text-[11px] font-bold w-6 h-6 flex items-center justify-center rounded-sm
+                        ${isDemoToday ? 'bg-[var(--primary)] text-[#000] shadow-[2px_2px_0px_0px_var(--background)]' : 'text-[var(--text-secondary)]'}
+                      `}>
+                        {format(day, dateFormat)}
+                      </span>
+                      
+                      <button className="h-5 w-5 flex items-center justify-center border border-dashed border-[var(--border)] rounded-sm text-[var(--text-muted)] hover:text-[var(--primary)] hover:border-[var(--primary)] hover:bg-[var(--primary)]/10 transition-colors opacity-0 group-hover:opacity-100">
+                        <Plus className="h-3 w-3" />
+                      </button>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      {dayEvents.map(event => {
+                        const st = statusColors[event.status] ?? statusColors.draft;
+                        return (
+                          <div key={event.id} className="relative rounded-sm border border-[var(--border)] bg-[var(--card)] p-1.5 hover:border-[var(--primary)] transition-colors cursor-pointer shadow-[1px_1px_0px_0px_var(--background)] hover:shadow-[1px_1px_0px_0px_var(--primary)]">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="font-mono text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-wider truncate mr-1">{event.channel}</span>
+                              <div className={`w-1.5 h-1.5 shrink-0 rounded-none ${st.variant === 'success' ? 'bg-[var(--success)]' : st.variant === 'warning' ? 'bg-[var(--warning)]' : st.variant === 'info' ? 'bg-[var(--info)]' : 'bg-[var(--text-muted)]'}`} />
+                            </div>
+                            <p className="text-[10px] font-medium text-[var(--text-primary)] leading-tight line-clamp-2">{event.content}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </section>
 
         {/* Content Packs */}
         <section>
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
-            <ImagePlus className="h-4 w-4 text-[var(--primary)]" />
-            Content Packs
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[var(--text-primary)] font-display">
+              <ImagePlus className="h-4 w-4 text-[var(--primary)]" />
+              Asset Packs
+            </h2>
+            <Button variant="ghost" size="sm" className="h-8 font-mono text-xs text-[var(--primary)] hover:bg-[var(--primary)]/10 rounded-none">View Archive <ExternalLink className="h-3 w-3 ml-1" /></Button>
+          </div>
           <div className="grid gap-4 md:grid-cols-3">
             {CONTENT_PACKS.map((pack) => {
               const st = statusColors[pack.status] ?? statusColors.draft;
               return (
                 <div
                   key={pack.title}
-                  className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5 space-y-3"
+                  className="card-elevated p-0 group flex flex-col border-[var(--border)] overflow-hidden"
                 >
-                  <div className="flex items-start justify-between">
-                    <h3 className="text-sm font-medium text-[var(--text-primary)]">{pack.title}</h3>
-                    <StatusChip variant={st.variant} label={st.label} />
+                  <div className="p-4 border-b border-[var(--border)] flex justify-between items-start bg-[var(--surface)]">
+                    <h3 className="text-sm font-bold font-display text-[var(--text-primary)] group-hover:text-[var(--primary)] transition-colors">{pack.title}</h3>
+                    <StatusChip variant={st.variant} label={st.label} className="rounded-sm font-mono tracking-widest text-[9px] uppercase border-[var(--border)]" />
                   </div>
-                  <p className="text-sm text-[var(--text-muted)]">{pack.description}</p>
-                  <p className="text-xs text-[var(--text-muted)]">{pack.items} assets</p>
+                  <div className="p-4 flex-1">
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{pack.description}</p>
+                  </div>
+                  <div className="p-3 border-t border-[var(--border)] bg-[var(--card)] flex items-center justify-between">
+                    <span className="font-mono text-xs text-[var(--text-muted)]"><span className="text-[var(--primary)] font-bold">{pack.items}</span> files</span>
+                    <Button variant="outline" size="sm" className="h-6 text-[10px] rounded-none border-[var(--border)] bg-transparent hover:bg-[var(--primary)] hover:text-[#000] hover:border-[var(--primary)] uppercase font-bold tracking-wider transition-colors shadow-[2px_2px_0px_0px_transparent] hover:shadow-[2px_2px_0px_0px_var(--primary)]">Open Drive</Button>
+                  </div>
                 </div>
               );
             })}

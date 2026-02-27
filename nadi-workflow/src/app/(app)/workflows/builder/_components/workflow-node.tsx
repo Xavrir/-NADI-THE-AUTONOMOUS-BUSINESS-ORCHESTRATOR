@@ -24,9 +24,9 @@ const typeConfig: Record<string, { icon: typeof Zap; accentClass: string; border
 
 const statusRing: Record<string, string> = {
   idle: "",
-  running: "ring-2 ring-[var(--info)] ring-offset-1 ring-offset-[var(--bg)] animate-pulse",
-  completed: "ring-2 ring-[var(--success)] ring-offset-1 ring-offset-[var(--bg)]",
-  failed: "ring-2 ring-[var(--danger)] ring-offset-1 ring-offset-[var(--bg)]",
+  running: "ring-2 ring-[var(--info)] ring-offset-2 ring-offset-[var(--bg)] animate-pulse",
+  completed: "ring-2 ring-[var(--success)] ring-offset-2 ring-offset-[var(--bg)] transition-all duration-500",
+  failed: "ring-2 ring-[var(--danger)] ring-offset-2 ring-offset-[var(--bg)] animate-shake",
 };
 
 function WorkflowNodeComponent({ data, selected }: NodeProps & { data: WorkflowNodeData }) {
@@ -43,19 +43,19 @@ function WorkflowNodeComponent({ data, selected }: NodeProps & { data: WorkflowN
       />
       <div
         className={cn(
-          "min-w-[140px] rounded-lg border bg-[var(--card)] px-4 py-3 shadow-md transition-all",
+          "min-w-[140px] rounded-sm border bg-[var(--card)] px-4 py-3 shadow-[4px_4px_0px_0px_var(--background)] transition-all",
           cfg.borderClass,
-          selected && "border-[var(--primary)] shadow-[var(--primary)]/10",
+          selected && "border-[var(--primary)] shadow-[4px_4px_0px_0px_var(--primary)]",
           statusRing[status]
         )}
       >
         <div className="flex items-center gap-2.5">
-          <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--surface)]", cfg.accentClass)}>
+          <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-[var(--surface)]", cfg.accentClass)}>
             <Icon className="h-3.5 w-3.5" />
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-[var(--text-primary)]">{data.label}</p>
-            <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">{data.nodeType.replace("_", " ")}</p>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{data.nodeType.replace("_", " ")}</p>
           </div>
         </div>
       </div>

@@ -45,19 +45,19 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
+    <div className="overflow-hidden card-elevated">
       <Table className={cn(density === "dense" && "dense-table")}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow
               key={headerGroup.id}
-              className="border-b border-[var(--border)] hover:bg-transparent"
+              className="border-b border-[var(--border)] bg-[var(--surface)] hover:bg-transparent"
             >
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
                   className={cn(
-                    "text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]",
+                    "text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]",
                     header.column.getCanSort() && "cursor-pointer select-none"
                   )}
                   onClick={header.column.getToggleSortingHandler()}
@@ -67,7 +67,7 @@ export function DataTable<TData, TValue>({
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
                     {header.column.getCanSort() && (
-                      <ArrowUpDown className="h-3 w-3 opacity-50" />
+                      <ArrowUpDown className="h-3 w-3 opacity-40" />
                     )}
                   </div>
                 </TableHead>
@@ -81,7 +81,7 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 className={cn(
-                  "border-b border-[var(--border)] transition-colors hover:bg-[var(--surface)]",
+                  "border-b border-[var(--border)] transition-colors hover:bg-[var(--primary)]/[0.03]",
                   onRowClick && "cursor-pointer"
                 )}
                 onClick={() => onRowClick?.(row.original)}

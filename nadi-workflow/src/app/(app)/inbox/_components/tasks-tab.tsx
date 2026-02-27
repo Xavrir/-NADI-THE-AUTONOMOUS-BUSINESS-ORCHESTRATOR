@@ -32,7 +32,7 @@ export function TasksTab() {
 
   if (tasks.length === 0) {
     return (
-      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-12 text-center">
+      <div className="card-elevated p-12 text-center">
         <p className="text-sm text-[var(--text-muted)]">No open tasks</p>
       </div>
     );
@@ -43,7 +43,7 @@ export function TasksTab() {
       {tasks.map((task) => (
         <div
           key={task.id}
-          className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-3"
+          className="flex items-center justify-between card-elevated px-4 py-3"
         >
           <div className="flex items-center gap-3">
             <StatusChip variant={priorityVariant(task.priority)} label={task.priority} />

@@ -79,7 +79,7 @@ export function TemplatesTab() {
       {templates?.map((tpl) => (
         <div
           key={tpl.id}
-          className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5 space-y-4"
+          className="card-elevated p-5 space-y-4"
         >
           {/* Header */}
           <div className="flex items-start justify-between">

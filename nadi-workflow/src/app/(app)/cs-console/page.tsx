@@ -84,21 +84,21 @@ export default function CsConsolePage() {
       <div className="space-y-4">
         {/* Summary */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
+          <div className="card-elevated p-3">
             <div className="flex items-center gap-2">
               <Headphones className="h-4 w-4 text-[var(--primary)]" />
               <p className="text-xs text-[var(--text-muted)]">Total Tickets</p>
             </div>
             <p className="mt-1 font-mono text-xl font-bold text-[var(--text-primary)]">{TICKETS.length}</p>
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
+          <div className="card-elevated p-3">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-[var(--warning)]" />
               <p className="text-xs text-[var(--text-muted)]">Open</p>
             </div>
             <p className="mt-1 font-mono text-xl font-bold text-[var(--warning)]">{openCount}</p>
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
+          <div className="card-elevated p-3">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-[var(--danger)]" />
               <p className="text-xs text-[var(--text-muted)]">Escalated</p>
@@ -108,7 +108,7 @@ export default function CsConsolePage() {
         </div>
 
         {/* Ticket list */}
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)]">
+        <div className="card-elevated">
           {TICKETS.map((ticket, i) => {
             const st = statusMap[ticket.status] ?? statusMap.open;
             return (

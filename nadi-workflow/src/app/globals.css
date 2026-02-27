@@ -194,3 +194,85 @@ table {
     scroll-behavior: auto !important;
   }
 }
+
+/* ============================================================
+   Premium card & glow effects (Stitch design language)
+   ============================================================ */
+
+/* Subtle glass border for cards — use alongside bg-[var(--card)] */
+.card-elevated {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 4px 4px 0px 0px var(--background);
+  transition: all 0.2s ease;
+}
+
+.card-elevated:hover {
+  border-color: var(--primary);
+  box-shadow: 4px 4px 0px 0px var(--primary);
+  transform: translate(-2px, -2px);
+}
+
+/* KPI card glow orb - repurposed as a sharp accent block */
+.glow-orb {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 2rem;
+  height: 2rem;
+  border-top-left-radius: 4px;
+  opacity: 1;
+  transition: all 0.2s ease;
+}
+
+.group:hover .glow-orb {
+  width: 100%;
+  height: 4px;
+  border-radius: 0;
+}
+
+/* Primary button glow - replaced with brutalist press effect */
+.btn-glow {
+  box-shadow: 3px 3px 0px 0px color-mix(in srgb, var(--primary) 40%, transparent);
+  border-radius: 4px;
+  border: 1px solid var(--primary);
+  transition: all 0.1s ease;
+}
+
+.btn-glow:hover {
+  box-shadow: 5px 5px 0px 0px color-mix(in srgb, var(--primary) 60%, transparent);
+  transform: translate(-2px, -2px);
+}
+
+.btn-glow:active {
+  box-shadow: 0px 0px 0px 0px transparent;
+  transform: translate(0px, 0px);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+.animate-shake {
+  animation: shake 0.2s ease-in-out 0s 2;
+}
+
+/* Micro grain overlay */
+.grain-overlay::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 50;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain-overlay::before {
+    display: none;
+  }
+}

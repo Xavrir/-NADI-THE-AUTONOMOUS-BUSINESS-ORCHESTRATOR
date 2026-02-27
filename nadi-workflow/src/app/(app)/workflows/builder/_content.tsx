@@ -18,7 +18,7 @@ import {
   BackgroundVariant,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Play, Loader2, ArrowLeft } from "lucide-react";
+import { Play, Loader2, ArrowLeft, Zap, GitBranch, Brain, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ import { WorkflowNode } from "./_components/workflow-node";
 import { NodeInspector } from "./_components/node-inspector";
 
 interface TemplateConfig {
-  nodes: Array<{ id: string; type: string; label: string }>;
+  nodes: Array<{ id: string; type: string; label: string; config?: Record<string, unknown> }>;
   edges: Array<{ source: string; target: string; label?: string }>;
 }
 
@@ -47,7 +47,7 @@ function layoutNodes(configNodes: TemplateConfig["nodes"]): Node[] {
     id: n.id,
     type: "workflowNode",
     position: { x: CENTER_X, y: i * SPACING_Y + 50 },
-    data: { label: n.label, nodeType: n.type, status: "idle" },
+    data: { label: n.label, nodeType: n.type, status: "idle", config: n.config },
   }));
 }
 
@@ -144,6 +144,13 @@ export function WorkflowBuilderContent() {
               node.id === n.id ? { ...node, data: { ...node.data, status: "completed" } } : node
             )
           );
+          setEdges((prev) =>
+            prev.map((edge) =>
+              edge.source === n.id
+                ? { ...edge, animated: false, style: { ...edge.style, stroke: "var(--success)" } }
+                : edge
+            )
+          );
         }, i * 600 + 500);
       });
     },
@@ -191,7 +198,7 @@ export function WorkflowBuilderContent() {
             <Button
               onClick={() => runMutation.mutate()}
               disabled={runMutation.isPending || !template?.configJson.nodes.length}
-              className="gap-1.5 bg-[var(--primary)] text-white hover:opacity-90"
+              className="btn-glow gap-1.5 bg-[var(--primary)] text-white hover:opacity-90"
             >
               {runMutation.isPending ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Running...</>
@@ -203,7 +210,30 @@ export function WorkflowBuilderContent() {
         }
       />
 
-      <div className="flex flex-1 overflow-hidden rounded-lg border border-[var(--border)]" style={{ height: "calc(100vh - 220px)" }}>
+      <div className="flex h-8 items-center gap-4 border-y border-[var(--border)] bg-[var(--surface)] px-4">
+        <div className="flex items-center gap-1.5">
+          <Zap className="h-3 w-3 text-[var(--primary)]" />
+          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--text-muted)]">Trigger</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <GitBranch className="h-3 w-3 text-[var(--info)]" />
+          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--text-muted)]">Logic</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Brain className="h-3 w-3 text-purple-400" />
+          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--text-muted)]">AI</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <ShieldCheck className="h-3 w-3 text-[var(--warning)]" />
+          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--text-muted)]">Policy</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Play className="h-3 w-3 text-[var(--success)]" />
+          <span className="font-mono text-[9px] uppercase tracking-widest text-[var(--text-muted)]">Execute</span>
+        </div>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden rounded-sm border border-[var(--border)]" style={{ height: "calc(100vh - 252px)" }}>
         <div className="flex-1">
           <ReactFlow
             nodes={nodes}

@@ -88,7 +88,7 @@ export function AuditLogContent() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-12 text-center">
+        <div className="card-elevated p-12 text-center">
           <p className="text-sm text-[var(--text-muted)]">No audit entries found</p>
         </div>
       ) : (

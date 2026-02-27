@@ -103,7 +103,7 @@ export default function GovernancePage() {
 
               {/* Policy fields */}
               <div className="grid gap-6 md:grid-cols-2">
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5 space-y-4">
+                <div className="card-elevated p-5 space-y-4">
                   <h3 className="text-sm font-medium text-[var(--text-primary)]">AI Confidence Gate</h3>
                   <div className="space-y-2">
                     <Label className="text-xs text-[var(--text-muted)]">
@@ -126,7 +126,7 @@ export default function GovernancePage() {
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5 space-y-4">
+                <div className="card-elevated p-5 space-y-4">
                   <h3 className="text-sm font-medium text-[var(--text-primary)]">Margin Sentinel</h3>
                   <div className="space-y-2">
                     <Label className="text-xs text-[var(--text-muted)]">Minimum Net Margin %</Label>
@@ -147,7 +147,7 @@ export default function GovernancePage() {
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5 space-y-4">
+                <div className="card-elevated p-5 space-y-4">
                   <h3 className="text-sm font-medium text-[var(--text-primary)]">Discount Limits</h3>
                   <div className="space-y-2">
                     <Label className="text-xs text-[var(--text-muted)]">Maximum Discount %</Label>
@@ -168,7 +168,7 @@ export default function GovernancePage() {
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5 space-y-4">
+                <div className="card-elevated p-5 space-y-4">
                   <h3 className="text-sm font-medium text-[var(--text-primary)]">High-Value Transactions</h3>
                   <div className="space-y-2">
                     <Label className="text-xs text-[var(--text-muted)]">Threshold (IDR) — requires approval</Label>
@@ -212,7 +212,7 @@ export default function GovernancePage() {
               Role-based access matrix for Kopi Nadi workspace. Roles are system-defined in the MVP.
             </p>
 
-            <div className="overflow-auto rounded-lg border border-[var(--border)]">
+            <div className="overflow-auto card-elevated">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[var(--border)] bg-[var(--card)]">

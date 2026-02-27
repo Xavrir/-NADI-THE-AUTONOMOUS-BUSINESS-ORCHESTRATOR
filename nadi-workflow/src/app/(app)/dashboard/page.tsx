@@ -124,9 +124,11 @@ export default function DashboardPage() {
       <div className="space-y-6">
         {/* Demo Mode Banner */}
         {showDemo && (
-          <div className="rounded-lg border border-[var(--primary)]/30 bg-[var(--primary)]/5 p-5 space-y-4">
+          <div className="card-elevated border border-[var(--primary)]/20 p-5 space-y-4">
             <div className="flex items-center gap-2">
-              <Play className="h-4 w-4 text-[var(--primary)]" />
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--primary)]/10">
+                <Play className="h-3.5 w-3.5 text-[var(--primary)]" />
+              </div>
               <h2 className="font-display text-sm font-bold text-[var(--text-primary)]">
                 Guided Demo — 2-Minute Walkthrough
               </h2>
@@ -136,9 +138,9 @@ export default function DashboardPage() {
                 const Icon = step.icon;
                 return (
                   <Link key={step.step} href={step.href}>
-                    <div className="group rounded-lg border border-[var(--border)] bg-[var(--card)] p-3 space-y-2 transition-all hover:border-[var(--primary)]/50 hover:shadow-md">
+                    <div className="group rounded-xl bg-[var(--surface)] p-3 space-y-2 transition-all hover:ring-1 hover:ring-[var(--primary)]/30 hover:shadow-lg hover:shadow-orange-500/5">
                       <div className="flex items-center gap-2">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-white">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--primary)] text-[10px] font-bold text-white shadow-md shadow-orange-500/20">
                           {step.step}
                         </span>
                         <Icon className="h-3.5 w-3.5 text-[var(--primary)]" />
@@ -158,86 +160,122 @@ export default function DashboardPage() {
 
         {/* KPI cards */}
         <div className="grid gap-4 md:grid-cols-4">
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 space-y-1">
-            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-              <DollarSign className="h-3.5 w-3.5" />
-              Net Cash Position
+          <div className="group card-elevated relative overflow-hidden p-5 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--primary)]/10">
+                  <DollarSign className="h-3.5 w-3.5 text-[var(--primary)]" />
+                </div>
+                Net Cash Position
+              </div>
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-[var(--success)]">
+                <TrendingUp className="h-2.5 w-2.5" />+12%
+              </span>
             </div>
             <p className="font-mono text-2xl font-bold text-[var(--text-primary)]">
               {formatIDR(kpis?.cashToday ?? 0)}
             </p>
+            <div className="glow-orb bg-[var(--primary)]" />
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 space-y-1">
-            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-              <TrendingUp className="h-3.5 w-3.5" />
-              Revenue (Posted)
+
+          <div className="group card-elevated relative overflow-hidden p-5 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">
+                  <TrendingUp className="h-3.5 w-3.5 text-[var(--success)]" />
+                </div>
+                Revenue (Posted)
+              </div>
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-[var(--success)]">
+                <TrendingUp className="h-2.5 w-2.5" />+8%
+              </span>
             </div>
             <p className="font-mono text-2xl font-bold text-[var(--success)]">
               {formatIDR(kpis?.revenueThisWeek ?? 0)}
             </p>
+            <div className="glow-orb bg-[var(--success)]" />
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 space-y-1">
-            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              Margin Health
+
+          <div className="group card-elevated relative overflow-hidden p-5 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">
+                  <ShieldCheck className="h-3.5 w-3.5 text-[var(--success)]" />
+                </div>
+                Margin Health
+              </div>
             </div>
             <StatusChip
               variant={kpis?.marginHealth === "healthy" ? "success" : "warning"}
               label={kpis?.marginHealth === "healthy" ? "Healthy" : "Attention Needed"}
               className="mt-1"
             />
+            <div className="glow-orb bg-[var(--success)]" />
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 space-y-1">
-            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-              <Bell className="h-3.5 w-3.5" />
-              Pending Approvals
+
+          <div className="group card-elevated relative overflow-hidden p-5 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${(kpis?.pendingApprovals ?? 0) > 0 ? "bg-amber-500/10" : "bg-white/5"}`}>
+                  <Bell className={`h-3.5 w-3.5 ${(kpis?.pendingApprovals ?? 0) > 0 ? "text-[var(--warning)]" : "text-[var(--text-muted)]"}`} />
+                </div>
+                Pending Approvals
+              </div>
+              {(kpis?.pendingApprovals ?? 0) > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-[var(--warning)]">
+                  <AlertTriangle className="h-2.5 w-2.5" />Action
+                </span>
+              )}
             </div>
             <p className={`font-mono text-2xl font-bold ${(kpis?.pendingApprovals ?? 0) > 0 ? "text-[var(--warning)]" : "text-[var(--text-primary)]"}`}>
               {kpis?.pendingApprovals ?? 0}
             </p>
+            <div className={`glow-orb ${(kpis?.pendingApprovals ?? 0) > 0 ? "bg-[var(--warning)]" : "bg-white/20"}`} />
           </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* Risks + Actions */}
-          <div className="space-y-3">
-            <h2 className="flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
-              <AlertTriangle className="h-4 w-4 text-[var(--warning)]" />
-              Active Risks
-            </h2>
-            {risks.length === 0 ? (
-              <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 text-sm text-[var(--text-muted)]">
-                No active risks detected
-              </div>
-            ) : (
+          <div className="space-y-4">
+            <div className="card-elevated p-5 space-y-3">
+              <h2 className="flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
+                <AlertTriangle className="h-4 w-4 text-[var(--warning)]" />
+                Active Risks
+              </h2>
+              {risks.length === 0 ? (
+                <p className="text-sm text-[var(--text-muted)]">No active risks detected</p>
+              ) : (
+                <div className="space-y-2">
+                  {risks.map((risk, i) => (
+                    <div key={i} className="flex items-center gap-3 rounded-xl bg-[var(--surface)] p-3">
+                      <div className={`h-2 w-2 rounded-full shrink-0 ${risk.severity === "danger" ? "bg-[var(--danger)]" : "bg-[var(--warning)]"}`} />
+                      <p className="text-sm text-[var(--text-secondary)]">{risk.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="card-elevated p-5 space-y-3">
+              <h2 className="flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
+                <ArrowRight className="h-4 w-4 text-[var(--primary)]" />
+                Suggested Actions
+              </h2>
               <div className="space-y-2">
-                {risks.map((risk, i) => (
-                  <div key={i} className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
-                    <div className={`h-2 w-2 rounded-full shrink-0 ${risk.severity === "danger" ? "bg-[var(--danger)]" : "bg-[var(--warning)]"}`} />
-                    <p className="text-sm text-[var(--text-secondary)]">{risk.label}</p>
-                  </div>
+                {actions.map((action, i) => (
+                  <Link key={i} href={action.href}>
+                    <div className="flex items-center justify-between rounded-xl bg-[var(--surface)] p-3 transition-all hover:bg-[var(--primary)]/[0.06] hover:ring-1 hover:ring-[var(--primary)]/20">
+                      <p className="text-sm text-[var(--text-primary)]">{action.label}</p>
+                      <ArrowRight className="h-4 w-4 text-[var(--primary)]" />
+                    </div>
+                  </Link>
                 ))}
               </div>
-            )}
-
-            <h2 className="flex items-center gap-2 pt-2 text-sm font-medium text-[var(--text-primary)]">
-              <ArrowRight className="h-4 w-4 text-[var(--primary)]" />
-              Suggested Actions
-            </h2>
-            <div className="space-y-2">
-              {actions.map((action, i) => (
-                <Link key={i} href={action.href}>
-                  <div className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card)] p-3 transition-colors hover:bg-[var(--surface)]">
-                    <p className="text-sm text-[var(--text-primary)]">{action.label}</p>
-                    <ArrowRight className="h-4 w-4 text-[var(--primary)]" />
-                  </div>
-                </Link>
-              ))}
             </div>
           </div>
 
           {/* Recent Audit */}
-          <div className="space-y-3">
+          <div className="card-elevated p-5 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
                 <FileText className="h-4 w-4 text-[var(--primary)]" />
@@ -250,18 +288,16 @@ export default function DashboardPage() {
               </Link>
             </div>
             {audit.length === 0 ? (
-              <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 text-sm text-[var(--text-muted)]">
-                No recent activity
-              </div>
+              <p className="text-sm text-[var(--text-muted)]">No recent activity</p>
             ) : (
-              <div className="space-y-0 rounded-lg border border-[var(--border)] bg-[var(--card)]">
+              <div className="space-y-0">
                 {audit.map((entry, i) => (
                   <div
                     key={entry.id}
-                    className={`flex items-start gap-3 p-3 ${i < audit.length - 1 ? "border-b border-[var(--border)]" : ""}`}
+                    className={`flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-[var(--surface)] ${i < audit.length - 1 ? "border-b border-white/[0.04]" : ""}`}
                   >
-                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--surface)]">
-                      <Clock className="h-3 w-3 text-[var(--text-muted)]" />
+                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--primary)]/10">
+                      <Clock className="h-3 w-3 text-[var(--primary)]" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm text-[var(--text-primary)]">{entry.summary}</p>
