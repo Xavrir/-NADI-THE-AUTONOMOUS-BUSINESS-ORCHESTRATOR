@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShoppingBag, Truck, CreditCard, BarChart3, Plug, RefreshCw, Brain } from "lucide-react";
+import { ShoppingBag, Truck, CreditCard, BarChart3, Plug, RefreshCw, Brain, RotateCcw } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,6 +41,8 @@ const statusMap: Record<string, { variant: "success" | "warning" | "neutral"; la
 export default function SettingsPage() {
   const queryClient = useQueryClient();
   const [isToggling, setIsToggling] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [resetResult, setResetResult] = useState<string | null>(null);
 
   const { data: connectors, isLoading } = useQuery<Connector[]>({
     queryKey: ["integrations"],
@@ -65,6 +67,25 @@ export default function SettingsPage() {
       console.error("Failed to toggle provider:", error);
     } finally {
       setIsToggling(false);
+    }
+  };
+
+  const handleResetDemo = async () => {
+    setIsResetting(true);
+    setResetResult(null);
+    try {
+      const res = await fetch("/api/settings/reset-demo", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        setResetResult("Demo data reset successfully");
+        queryClient.invalidateQueries();
+      } else {
+        setResetResult("Reset failed: " + (data.error ?? "unknown error"));
+      }
+    } catch {
+      setResetResult("Reset failed: network error");
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -235,25 +256,65 @@ export default function SettingsPage() {
             <div className="card-elevated p-5 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--text-muted)]">Database</span>
-              <span className="font-mono text-[var(--text-secondary)]">SQLite (dev)</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-[var(--text-muted)]">LLM Provider</span>
-              <span className="font-mono text-[var(--text-secondary)]">
-                {llmSettings?.provider === "pollinations" ? "Pollinations AI" : "Stub (Deterministic)"}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-[var(--text-muted)]">Version</span>
-              <span className="font-mono text-[var(--text-secondary)]">MVP 0.4</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-[var(--text-muted)]">Workspace</span>
-              <span className="font-mono text-[var(--text-secondary)]">Kopi Nadi</span>
+               <span className="font-mono text-[var(--text-secondary)]">SQLite (dev)</span>
+             </div>
+             <div className="flex justify-between text-sm">
+               <span className="text-[var(--text-muted)]">LLM Provider</span>
+               <span className="font-mono text-[var(--text-secondary)]">
+                 {llmSettings?.provider === "pollinations" ? "Pollinations AI" : "Stub (Deterministic)"}
+               </span>
+             </div>
+             <div className="flex justify-between text-sm">
+               <span className="text-[var(--text-muted)]">Version</span>
+               <span className="font-mono text-[var(--text-secondary)]">MVP 0.4</span>
+             </div>
+             <div className="flex justify-between text-sm">
+               <span className="text-[var(--text-muted)]">Workspace</span>
+               <span className="font-mono text-[var(--text-secondary)]">Kopi Nadi</span>
+             </div>
+           </div>
+         </section>
+
+        {/* Demo Controls */}
+        <section>
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
+            <RotateCcw className="h-4 w-4 text-[var(--primary)]" />
+            Demo Controls
+          </h2>
+
+          <div className="card-elevated p-5 space-y-4">
+            <p className="text-sm text-[var(--text-secondary)]">
+              Reset all data to the original Kopi Nadi demo state. This will clear all workflow runs, approvals, and audit entries.
+            </p>
+
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={handleResetDemo}
+                disabled={isResetting}
+                className="btn-glow gap-2 w-fit"
+              >
+                {isResetting ? (
+                  <>
+                    <RotateCcw className="h-4 w-4 animate-spin" />
+                    Resetting...
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw className="h-4 w-4" />
+                    Reset Demo Data
+                  </>
+                )}
+              </Button>
+
+              {resetResult && (
+                <p className={`text-xs font-mono ${resetResult.includes("successfully") ? "text-green-500" : "text-red-500"}`}>
+                  {resetResult}
+                </p>
+              )}
             </div>
           </div>
         </section>
-      </div>
-    </div>
-  );
-}
+       </div>
+     </div>
+   );
+ }
