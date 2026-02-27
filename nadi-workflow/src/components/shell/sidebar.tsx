@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   LayoutDashboard,
   Inbox,
@@ -64,9 +65,13 @@ export function Sidebar() {
     <aside className="flex h-full w-60 shrink-0 flex-col border-r border-[var(--sidebar-border)] bg-[var(--sidebar)]">
       {/* Brand */}
       <div className="flex items-center gap-3 border-b border-[var(--sidebar-border)] px-5 py-4 bg-[var(--background)]">
-        <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-[var(--primary)] text-[#000] shadow-[2px_2px_0px_0px_color-mix(in_srgb,var(--primary)_30%,transparent)]">
-          <GitBranch className="h-5 w-5 stroke-[2.5]" />
-        </div>
+        <Image
+          src="/nadi-logo.jpeg"
+          alt="NADI Logo"
+          width={36}
+          height={36}
+          className="h-9 w-9 rounded-sm object-cover shadow-[2px_2px_0px_0px_color-mix(in_srgb,var(--primary)_30%,transparent)]"
+        />
         <div className="flex flex-col">
           <span className="font-display text-sm font-bold tracking-widest uppercase text-[var(--text-primary)]">
             NADI

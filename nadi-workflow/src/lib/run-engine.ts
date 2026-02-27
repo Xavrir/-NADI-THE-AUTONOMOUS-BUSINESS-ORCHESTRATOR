@@ -107,6 +107,14 @@ function topologicalSort(nodes: NodeConfig[], edges: EdgeConfig[], entryId?: str
 
 // ─── Sample Data for Demo ─────────────────────────────────────────
 
+function deterministicIndex(runId: string, arrayLength: number): number {
+  let hash = 0;
+  for (let i = 0; i < runId.length; i++) {
+    hash = ((hash << 5) - hash + runId.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash) % arrayLength;
+}
+
 const SAMPLE_TRANSACTIONS = [
   { description: "Pembelian biji kopi Arabica Gayo 50kg", debit: 4250000, credit: 0, reference: "PO-2026-0142" },
   { description: "Penjualan latte oat milk x12 via Grab", debit: 0, credit: 540000, reference: "GRB-26022701" },
@@ -115,21 +123,33 @@ const SAMPLE_TRANSACTIONS = [
   { description: "Gaji part-time barista Minggu ke-4", debit: 1200000, credit: 0, reference: "HR-W4-FEB26" },
 ];
 
+const SAMPLE_MARKETING_SIGNALS = [
+  { topic: "Promo Valentine latte couple bundle", products: "Hot Latte, Matcha Latte", overstock: "MATCHA-LATTE" },
+  { topic: "Weekend flash sale iced drinks", products: "Iced Americano, Kopi Susu 250ml", overstock: null },
+  { topic: "Ramadan pre-dawn coffee promo", products: "Kopi Susu 250ml, Hot Latte, Gula Aren 1L", overstock: "GULA-AREN-1L" },
+];
+
+const SAMPLE_ORDERS = [
+  { orderId: "ORD-SH-4501", items: "Kopi Susu 250ml x3, Iced Americano x2", channel: "shopify", stockStatus: "available", total: 98000 },
+  { orderId: "ORD-GF-1102", items: "Matcha Latte x1, Hot Latte x1", channel: "gofood", stockStatus: "available", total: 53000 },
+  { orderId: "ORD-GRB-880", items: "Gula Aren 1L x5", channel: "grabfood", stockStatus: "low (3 units)", total: 275000 },
+];
+
 // ─── Node Executors ───────────────────────────────────────────────
 
 async function executeTrigger(node: NodeConfig, ctx: RunContext): Promise<NodeResult> {
   const triggerType = (node.config?.triggerType as string) ?? ctx.triggerType;
+  const idx = deterministicIndex(ctx.runId, 100);
 
-  // Inject sample transaction for demo so downstream AI nodes have real context
   if (triggerType === "csv_import") {
-    const sample = SAMPLE_TRANSACTIONS[Math.floor(Math.random() * SAMPLE_TRANSACTIONS.length)];
-    ctx.data = {
-      ...ctx.data,
-      description: sample.description,
-      debit: sample.debit,
-      credit: sample.credit,
-      reference: sample.reference,
-    };
+    const sample = SAMPLE_TRANSACTIONS[idx % SAMPLE_TRANSACTIONS.length];
+    ctx.data = { ...ctx.data, ...sample };
+  } else if (triggerType === "weekly_schedule") {
+    const sample = SAMPLE_MARKETING_SIGNALS[idx % SAMPLE_MARKETING_SIGNALS.length];
+    ctx.data = { ...ctx.data, ...sample };
+  } else if (triggerType === "order_webhook") {
+    const sample = SAMPLE_ORDERS[idx % SAMPLE_ORDERS.length];
+    ctx.data = { ...ctx.data, ...sample };
   }
 
   return {
@@ -139,7 +159,7 @@ async function executeTrigger(node: NodeConfig, ctx: RunContext): Promise<NodeRe
       triggerType,
       message: `Trigger activated: ${triggerType}`,
       timestamp: new Date().toISOString(),
-      sampleData: triggerType === "csv_import" ? ctx.data : undefined,
+      sampleData: ctx.data,
     },
     evidence: {
       evidenceId: generateEvidenceId(),

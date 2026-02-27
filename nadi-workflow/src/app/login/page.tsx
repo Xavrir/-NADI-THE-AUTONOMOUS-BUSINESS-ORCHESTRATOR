@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { GitBranch, Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -57,9 +58,13 @@ export default function LoginPage() {
 
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-16">
-            <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-[var(--primary)] text-[#000] shadow-[4px_4px_0px_0px_color-mix(in_srgb,var(--primary)_30%,transparent)]">
-              <GitBranch className="h-6 w-6 stroke-[2.5]" />
-            </div>
+            <Image
+              src="/nadi-logo.jpeg"
+              alt="NADI Logo"
+              width={48}
+              height={48}
+              className="h-12 w-12 rounded-sm object-cover shadow-[4px_4px_0px_0px_color-mix(in_srgb,var(--primary)_30%,transparent)]"
+            />
             <div>
               <h1 className="font-display text-2xl font-black uppercase tracking-widest text-[var(--text-primary)]">NADI</h1>
               <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--primary)]">Orchestrator</p>
@@ -100,9 +105,13 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile logo */}
           <div className="flex items-center gap-3 lg:hidden mb-8">
-            <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-[var(--primary)] text-[#000] shadow-[3px_3px_0px_0px_color-mix(in_srgb,var(--primary)_30%,transparent)]">
-              <GitBranch className="h-5 w-5 stroke-[2.5]" />
-            </div>
+            <Image
+              src="/nadi-logo.jpeg"
+              alt="NADI Logo"
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-sm object-cover shadow-[3px_3px_0px_0px_color-mix(in_srgb,var(--primary)_30%,transparent)]"
+            />
             <div>
               <h1 className="font-display text-lg font-black uppercase tracking-widest text-[var(--text-primary)]">NADI</h1>
               <p className="font-mono text-[8px] font-bold uppercase tracking-widest text-[var(--primary)]">Orchestrator</p>

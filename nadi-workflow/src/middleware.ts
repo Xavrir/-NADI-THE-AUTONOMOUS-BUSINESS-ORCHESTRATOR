@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
   if (isPublic) return NextResponse.next();
 
   // Allow static files and API routes that aren't auth-related
-  if (pathname.startsWith("/_next") || pathname.startsWith("/favicon")) {
+  if (pathname.startsWith("/_next") || pathname.startsWith("/favicon") || pathname.startsWith("/nadi-logo")) {
     return NextResponse.next();
   }
 

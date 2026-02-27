@@ -225,23 +225,70 @@ async function main() {
     },
   });
 
-  await prisma.workflowTemplate.createMany({
-    data: [
-      {
-        id: "tpl-marketing-weekly",
-        name: "Marketing Weekly Factory",
-        description: "Generate weekly content plan and social media packs",
-        version: 1,
-        configJson: JSON.stringify({ nodes: [], edges: [] }),
-      },
-      {
-        id: "tpl-order-ops",
-        name: "New Order Ops",
-        description: "Process incoming orders, check stock, route actions",
-        version: 1,
-        configJson: JSON.stringify({ nodes: [], edges: [] }),
-      },
-    ],
+  await prisma.workflowTemplate.create({
+    data: {
+      id: "tpl-marketing-weekly",
+      name: "Marketing Weekly Factory",
+      description: "Generate weekly content plan and social media packs",
+      version: 1,
+      configJson: JSON.stringify({
+        entryNodeId: "trigger",
+        nodes: [
+          { id: "trigger", type: "trigger", label: "Weekly Schedule", config: { triggerType: "weekly_schedule" } },
+          { id: "fetch_signals", type: "logic", label: "Fetch Market Signals", config: { task: "fetch_market_signals" } },
+          { id: "ai_strategy", type: "ai", label: "AI Content Strategy", config: { task: "draft_content_strategy" } },
+          { id: "confidence", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.8 } },
+          { id: "policy", type: "policy_check", label: "Policy Check", config: { policyKey: "marketing_budget" } },
+          { id: "approval", type: "approval", label: "Owner Approval", config: { approvalType: "owner" } },
+          { id: "export", type: "execute", label: "Export Content Pack", config: { actionType: "export_content_csv" } },
+          { id: "review", type: "execute", label: "Route to Review", config: { actionType: "create_review_item" } },
+          { id: "audit", type: "audit", label: "Write Audit", config: { eventType: "marketing_plan_generated" } },
+        ],
+        edges: [
+          { source: "trigger", target: "fetch_signals" },
+          { source: "fetch_signals", target: "ai_strategy" },
+          { source: "ai_strategy", target: "confidence" },
+          { source: "confidence", target: "policy", label: "high" },
+          { source: "confidence", target: "review", label: "low" },
+          { source: "policy", target: "approval" },
+          { source: "approval", target: "export" },
+          { source: "export", target: "audit" },
+          { source: "review", target: "audit" },
+        ],
+      }),
+    },
+  });
+
+  await prisma.workflowTemplate.create({
+    data: {
+      id: "tpl-order-ops",
+      name: "New Order Ops",
+      description: "Process incoming orders, check stock, route actions",
+      version: 1,
+      configJson: JSON.stringify({
+        entryNodeId: "trigger",
+        nodes: [
+          { id: "trigger", type: "trigger", label: "Order Received", config: { triggerType: "order_webhook" } },
+          { id: "normalize", type: "logic", label: "Normalize Order", config: { task: "normalize_order" } },
+          { id: "stock_check", type: "logic", label: "Check Stock", config: { task: "check_stock_availability" } },
+          { id: "ai_route", type: "ai", label: "AI Route Decision", config: { task: "classify_order_action" } },
+          { id: "confidence", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.85 } },
+          { id: "fulfill", type: "execute", label: "Confirm & Fulfill", config: { actionType: "confirm_order" } },
+          { id: "hold", type: "execute", label: "Hold for Review", config: { actionType: "hold_order" } },
+          { id: "audit", type: "audit", label: "Write Audit", config: { eventType: "order_processed" } },
+        ],
+        edges: [
+          { source: "trigger", target: "normalize" },
+          { source: "normalize", target: "stock_check" },
+          { source: "stock_check", target: "ai_route" },
+          { source: "ai_route", target: "confidence" },
+          { source: "confidence", target: "fulfill", label: "high" },
+          { source: "confidence", target: "hold", label: "low" },
+          { source: "fulfill", target: "audit" },
+          { source: "hold", target: "audit" },
+        ],
+      }),
+    },
   });
 
   const run = await prisma.workflowRun.create({

@@ -52,6 +52,23 @@ const PROMPT_TEMPLATES: Record<string, { version: string; system: string; user: 
       `Return JSON: {"strategy": string, "platforms": string[], "confidence": number, "rationale": string}`,
   },
 
+  classify_order_action: {
+    version: "v1.0",
+    system: [
+      "You are an order routing AI for Kopi Nadi, an Indonesian coffee MSME.",
+      "Decide whether an incoming order should be fulfilled immediately or held for review.",
+      "Consider: stock availability, order size, delivery address clarity, payment status.",
+      "Return ONLY valid JSON with no markdown. Schema:",
+      '{"action": "fulfill" | "hold", "confidence": number (0-1), "rationale": string}',
+    ].join(" "),
+    user: (ctx) =>
+      `Route this order: ${ctx.orderId ?? "unknown"}, ` +
+      `items: ${ctx.items ?? "assorted coffee products"}, ` +
+      `stock status: ${ctx.stockStatus ?? "available"}, ` +
+      `channel: ${ctx.channel ?? "shopify"}.` +
+      ` Return JSON: {"action": "fulfill" or "hold", "confidence": number 0-1, "rationale": string}`,
+  },
+
   classify_general: {
     version: "v1.0",
     system: [
