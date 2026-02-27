@@ -37,5 +37,56 @@ export async function POST(
     approvalId: id,
   });
 
+  // Execute side effects based on action type
+  if (approval.actionType === "price_change" && approval.afterJson) {
+    await executePriceChange(approval, id);
+  }
+
   return NextResponse.json(updated);
+}
+
+/* -- Execute price change on approval ----------------------------- */
+async function executePriceChange(approval: { targetId: string | null; afterJson: string | null }, approvalId: string) {
+  if (!approval.afterJson || !approval.targetId) return;
+
+  const afterState = JSON.parse(approval.afterJson) as {
+    sku: string;
+    channel: string;
+    price: number;
+    cogs: number;
+    feePct: number;
+    netMarginPct: number;
+    status: string;
+  };
+
+  // Create new economics snapshot with approved price
+  await prisma.unitEconomicsSnapshot.create({
+    data: {
+      sku: afterState.sku,
+      channel: afterState.channel,
+      price: afterState.price,
+      cogs: afterState.cogs,
+      feePct: afterState.feePct,
+      netMarginPct: afterState.netMarginPct,
+      status: afterState.status,
+    },
+  });
+
+  // Update product price if Shopify (primary)
+  if (afterState.channel === "shopify") {
+    await prisma.product.update({
+      where: { sku: afterState.sku },
+      data: { price: afterState.price },
+    });
+  }
+
+  await writeAudit({
+    eventType: "finance.price_change_executed",
+    actor: "system",
+    targetType: "unit_economics",
+    targetId: approval.targetId,
+    summary: `Price change applied: ${afterState.sku} (${afterState.channel}) → ${afterState.price} IDR`,
+    afterJson: afterState,
+    approvalId,
+  });
 }
