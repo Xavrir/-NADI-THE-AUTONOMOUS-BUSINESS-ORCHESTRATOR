@@ -1,4 +1,4 @@
-import { Command } from "@langchain/langgraph";
+import { Command, isGraphInterrupt, isInterrupted } from "@langchain/langgraph";
 import { prisma } from "@/lib/db";
 import { writeAudit } from "@/lib/audit";
 import { buildGraph } from "./build-graph";
@@ -82,21 +82,25 @@ export async function runWorkflowLangGraph(
 
   try {
     const result = await compiledGraph.invoke(initialState, threadConfig);
-    finalState = result as WorkflowState;
-  } catch (err) {
-    // Check if it's an interrupt (approval node paused)
-    const errMsg = err instanceof Error ? err.message : String(err);
-    if (errMsg.includes("interrupt") || errMsg.includes("Interrupt")) {
+    if (isInterrupted(result)) {
       interrupted = true;
       runStatus = "awaiting_approval";
-
-      // Get current state from checkpointer
       const snapshot = await compiledGraph.getState(threadConfig);
       if (snapshot?.values) {
         finalState = snapshot.values as WorkflowState;
       }
     } else {
-      // Real error
+      finalState = result as WorkflowState;
+    }
+  } catch (err) {
+    if (isGraphInterrupt(err)) {
+      interrupted = true;
+      runStatus = "awaiting_approval";
+      const snapshot = await compiledGraph.getState(threadConfig);
+      if (snapshot?.values) {
+        finalState = snapshot.values as WorkflowState;
+      }
+    } else {
       await prisma.workflowRun.update({
         where: { id: run.id },
         data: { status: "failed", completedAt: new Date() },
@@ -193,11 +197,17 @@ export async function resumeWorkflow(
 
   try {
     const result = await compiledGraph.invoke(resumeCommand, threadConfig);
-    finalState = result as WorkflowState;
+    if (isInterrupted(result)) {
+      runStatus = "awaiting_approval";
+      const snapshot = await compiledGraph.getState(threadConfig);
+      if (snapshot?.values) {
+        finalState = snapshot.values as WorkflowState;
+      }
+    } else {
+      finalState = result as WorkflowState;
+    }
   } catch (err) {
-    const errMsg = err instanceof Error ? err.message : String(err);
-    // Could be another interrupt (multiple approval nodes)
-    if (errMsg.includes("interrupt") || errMsg.includes("Interrupt")) {
+    if (isGraphInterrupt(err)) {
       runStatus = "awaiting_approval";
       const snapshot = await compiledGraph.getState(threadConfig);
       if (snapshot?.values) {

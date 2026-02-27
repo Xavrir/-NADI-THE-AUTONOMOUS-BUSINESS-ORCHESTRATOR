@@ -7,6 +7,16 @@ function eid(suffix: string) {
 }
 
 async function main() {
+  // Demo user (plaintext password — MVP only)
+  await prisma.user.create({
+    data: {
+      id: "user_owner",
+      name: "Owner",
+      email: "owner@nadi.local",
+      password: "password123",
+    },
+  });
+
   await prisma.product.createMany({
     data: [
       { sku: "NADI-TEE-BLK-OS", name: "Oversized Tee - Shadow Black", cogs: 65000, price: 189000, reorderPoint: 20 },
@@ -183,7 +193,7 @@ async function main() {
           { id: "trigger", type: "trigger", label: "CSV Import", config: { triggerType: "csv_import" } },
           { id: "normalize", type: "logic", label: "Normalize & Dedupe", config: { task: "normalize_deduplicate" } },
           { id: "classify", type: "ai", label: "AI Classification", config: { task: "classify_ledger_row" } },
-          { id: "confidence", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.9 } },
+          { id: "conf_gate", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.9 } },
           { id: "post", type: "execute", label: "Post to Ledger", config: { actionType: "post_ledger_entries" } },
           { id: "review", type: "execute", label: "Route to Review", config: { actionType: "create_review_item" } },
           { id: "audit", type: "audit", label: "Write Audit", config: { eventType: "workflow_executed" } },
@@ -191,9 +201,9 @@ async function main() {
         edges: [
           { source: "trigger", target: "normalize" },
           { source: "normalize", target: "classify" },
-          { source: "classify", target: "confidence" },
-          { source: "confidence", target: "post", label: "high" },
-          { source: "confidence", target: "review", label: "low" },
+          { source: "classify", target: "conf_gate" },
+          { source: "conf_gate", target: "post", label: "high" },
+          { source: "conf_gate", target: "review", label: "low" },
           { source: "post", target: "audit" },
           { source: "review", target: "audit" },
         ],
@@ -244,7 +254,7 @@ async function main() {
           { id: "trigger", type: "trigger", label: "Weekly Schedule", config: { triggerType: "weekly_schedule" } },
           { id: "fetch_signals", type: "logic", label: "Fetch Market Signals", config: { task: "fetch_market_signals" } },
           { id: "ai_strategy", type: "ai", label: "AI Content Strategy", config: { task: "draft_content_strategy" } },
-          { id: "confidence", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.8 } },
+          { id: "conf_gate", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.8 } },
           { id: "policy", type: "policy_check", label: "Policy Check", config: { policyKey: "marketing_budget" } },
           { id: "approval", type: "approval", label: "Owner Approval", config: { approvalType: "owner" } },
           { id: "export", type: "execute", label: "Export Content Pack", config: { actionType: "export_content_csv" } },
@@ -254,9 +264,9 @@ async function main() {
         edges: [
           { source: "trigger", target: "fetch_signals" },
           { source: "fetch_signals", target: "ai_strategy" },
-          { source: "ai_strategy", target: "confidence" },
-          { source: "confidence", target: "policy", label: "high" },
-          { source: "confidence", target: "review", label: "low" },
+          { source: "ai_strategy", target: "conf_gate" },
+          { source: "conf_gate", target: "policy", label: "high" },
+          { source: "conf_gate", target: "review", label: "low" },
           { source: "policy", target: "approval" },
           { source: "approval", target: "export" },
           { source: "export", target: "audit" },
@@ -279,7 +289,7 @@ async function main() {
           { id: "normalize", type: "logic", label: "Normalize Order", config: { task: "normalize_order" } },
           { id: "stock_check", type: "logic", label: "Check Stock", config: { task: "check_stock_availability" } },
           { id: "ai_route", type: "ai", label: "AI Route Decision", config: { task: "classify_order_action" } },
-          { id: "confidence", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.85 } },
+          { id: "conf_gate", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.85 } },
           { id: "fulfill", type: "execute", label: "Confirm & Fulfill", config: { actionType: "confirm_order" } },
           { id: "hold", type: "execute", label: "Hold for Review", config: { actionType: "hold_order" } },
           { id: "audit", type: "audit", label: "Write Audit", config: { eventType: "order_processed" } },
@@ -288,9 +298,9 @@ async function main() {
           { source: "trigger", target: "normalize" },
           { source: "normalize", target: "stock_check" },
           { source: "stock_check", target: "ai_route" },
-          { source: "ai_route", target: "confidence" },
-          { source: "confidence", target: "fulfill", label: "high" },
-          { source: "confidence", target: "hold", label: "low" },
+          { source: "ai_route", target: "conf_gate" },
+          { source: "conf_gate", target: "fulfill", label: "high" },
+          { source: "conf_gate", target: "hold", label: "low" },
           { source: "fulfill", target: "audit" },
           { source: "hold", target: "audit" },
         ],
@@ -309,7 +319,7 @@ async function main() {
         nodes: [
           { id: "trigger", type: "trigger", label: "New Approval", config: { triggerType: "approval_created" } },
           { id: "classify", type: "ai", label: "Classify Urgency", config: { task: "classify_general" } },
-          { id: "confidence", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.85 } },
+          { id: "conf_gate", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.85 } },
           { id: "policy", type: "policy_check", label: "Policy Check", config: { policyKey: "approval_routing" } },
           { id: "auto_resolve", type: "execute", label: "Auto Resolve", config: { actionType: "auto_resolve_low_risk" } },
           { id: "route_owner", type: "approval", label: "Route to Owner", config: { approvalType: "owner" } },
@@ -317,9 +327,9 @@ async function main() {
         ],
         edges: [
           { source: "trigger", target: "classify" },
-          { source: "classify", target: "confidence" },
-          { source: "confidence", target: "policy", label: "high" },
-          { source: "confidence", target: "route_owner", label: "low" },
+          { source: "classify", target: "conf_gate" },
+          { source: "conf_gate", target: "policy", label: "high" },
+          { source: "conf_gate", target: "route_owner", label: "low" },
           { source: "policy", target: "auto_resolve", label: "pass" },
           { source: "policy", target: "route_owner", label: "blocked" },
           { source: "auto_resolve", target: "audit" },
@@ -370,16 +380,16 @@ async function main() {
         nodes: [
           { id: "trigger", type: "trigger", label: "CS Ticket", config: { triggerType: "cs_ticket" } },
           { id: "classify", type: "ai", label: "Classify & Sentiment", config: { task: "classify_general" } },
-          { id: "confidence", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.80 } },
+          { id: "conf_gate", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.80 } },
           { id: "draft_response", type: "execute", label: "Draft Response", config: { actionType: "draft_cs_response" } },
           { id: "escalate", type: "approval", label: "Escalate to Human", config: { approvalType: "cs_agent" } },
           { id: "audit", type: "audit", label: "Write Audit", config: { eventType: "cs_ticket_processed" } },
         ],
         edges: [
           { source: "trigger", target: "classify" },
-          { source: "classify", target: "confidence" },
-          { source: "confidence", target: "draft_response", label: "high" },
-          { source: "confidence", target: "escalate", label: "low" },
+          { source: "classify", target: "conf_gate" },
+          { source: "conf_gate", target: "draft_response", label: "high" },
+          { source: "conf_gate", target: "escalate", label: "low" },
           { source: "draft_response", target: "audit" },
           { source: "escalate", target: "audit" },
         ],
@@ -404,7 +414,7 @@ async function main() {
       { runId: run.id, nodeId: "trigger", nodeType: "trigger", status: "completed", outputJson: JSON.stringify({ rowCount: 6 }), startedAt: yesterday, completedAt: yesterday },
       { runId: run.id, nodeId: "normalize", nodeType: "logic", status: "completed", outputJson: JSON.stringify({ unique: 6, duplicates: 0 }), startedAt: yesterday, completedAt: yesterday },
       { runId: run.id, nodeId: "classify", nodeType: "ai", status: "completed", outputJson: JSON.stringify({ classified: 6, avgConfidence: 0.862 }), startedAt: yesterday, completedAt: yesterday },
-      { runId: run.id, nodeId: "confidence", nodeType: "confidence_gate", status: "completed", outputJson: JSON.stringify({ passed: 4, routed: 2 }), startedAt: yesterday, completedAt: yesterday },
+      { runId: run.id, nodeId: "conf_gate", nodeType: "confidence_gate", status: "completed", outputJson: JSON.stringify({ passed: 4, routed: 2 }), startedAt: yesterday, completedAt: yesterday },
       { runId: run.id, nodeId: "post", nodeType: "execute", status: "completed", outputJson: JSON.stringify({ posted: 4 }), startedAt: yesterday, completedAt: yesterday },
       { runId: run.id, nodeId: "review", nodeType: "execute", status: "completed", outputJson: JSON.stringify({ reviewItems: 2 }), startedAt: yesterday, completedAt: yesterday },
       { runId: run.id, nodeId: "audit", nodeType: "audit", status: "completed", outputJson: JSON.stringify({ entries: 6 }), startedAt: yesterday, completedAt: yesterday },
