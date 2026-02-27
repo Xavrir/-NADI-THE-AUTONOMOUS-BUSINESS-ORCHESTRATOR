@@ -298,6 +298,95 @@ async function main() {
     },
   });
 
+  await prisma.workflowTemplate.create({
+    data: {
+      id: "tpl-inbox-actions",
+      name: "Inbox Actions",
+      description: "Classify incoming approval requests by urgency, check policy, route to owner or auto-resolve low-risk items",
+      version: 1,
+      configJson: JSON.stringify({
+        entryNodeId: "trigger",
+        nodes: [
+          { id: "trigger", type: "trigger", label: "New Approval", config: { triggerType: "approval_created" } },
+          { id: "classify", type: "ai", label: "Classify Urgency", config: { task: "classify_general" } },
+          { id: "confidence", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.85 } },
+          { id: "policy", type: "policy_check", label: "Policy Check", config: { policyKey: "approval_routing" } },
+          { id: "auto_resolve", type: "execute", label: "Auto Resolve", config: { actionType: "auto_resolve_low_risk" } },
+          { id: "route_owner", type: "approval", label: "Route to Owner", config: { approvalType: "owner" } },
+          { id: "audit", type: "audit", label: "Write Audit", config: { eventType: "inbox_action_processed" } },
+        ],
+        edges: [
+          { source: "trigger", target: "classify" },
+          { source: "classify", target: "confidence" },
+          { source: "confidence", target: "policy", label: "high" },
+          { source: "confidence", target: "route_owner", label: "low" },
+          { source: "policy", target: "auto_resolve", label: "pass" },
+          { source: "policy", target: "route_owner", label: "blocked" },
+          { source: "auto_resolve", target: "audit" },
+          { source: "route_owner", target: "audit" },
+        ],
+      }),
+    },
+  });
+
+  await prisma.workflowTemplate.create({
+    data: {
+      id: "tpl-inventory-restock",
+      name: "Inventory Restock",
+      description: "Scan inventory levels, flag below-reorder-point SKUs, create restock approval for high-cost orders",
+      version: 1,
+      configJson: JSON.stringify({
+        entryNodeId: "trigger",
+        nodes: [
+          { id: "trigger", type: "trigger", label: "Stock Monitor", config: { triggerType: "schedule" } },
+          { id: "scan", type: "logic", label: "Scan Inventory", config: { task: "scan_low_stock" } },
+          { id: "ai_restock", type: "ai", label: "AI Restock Plan", config: { task: "classify_general" } },
+          { id: "policy", type: "policy_check", label: "Cost Policy Check", config: { policyKey: "restock_cost" } },
+          { id: "approval", type: "approval", label: "Owner Approval", config: { approvalType: "owner" } },
+          { id: "create_order", type: "execute", label: "Create Restock Order", config: { actionType: "create_restock_order" } },
+          { id: "audit", type: "audit", label: "Write Audit", config: { eventType: "restock_initiated" } },
+        ],
+        edges: [
+          { source: "trigger", target: "scan" },
+          { source: "scan", target: "ai_restock" },
+          { source: "ai_restock", target: "policy" },
+          { source: "policy", target: "approval", label: "blocked" },
+          { source: "policy", target: "create_order", label: "pass" },
+          { source: "approval", target: "create_order" },
+          { source: "create_order", target: "audit" },
+        ],
+      }),
+    },
+  });
+
+  await prisma.workflowTemplate.create({
+    data: {
+      id: "tpl-cs-assist",
+      name: "CS Assist",
+      description: "Classify incoming CS tickets by category and sentiment, auto-draft response for common issues, escalate complex cases",
+      version: 1,
+      configJson: JSON.stringify({
+        entryNodeId: "trigger",
+        nodes: [
+          { id: "trigger", type: "trigger", label: "CS Ticket", config: { triggerType: "cs_ticket" } },
+          { id: "classify", type: "ai", label: "Classify & Sentiment", config: { task: "classify_general" } },
+          { id: "confidence", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.80 } },
+          { id: "draft_response", type: "execute", label: "Draft Response", config: { actionType: "draft_cs_response" } },
+          { id: "escalate", type: "approval", label: "Escalate to Human", config: { approvalType: "cs_agent" } },
+          { id: "audit", type: "audit", label: "Write Audit", config: { eventType: "cs_ticket_processed" } },
+        ],
+        edges: [
+          { source: "trigger", target: "classify" },
+          { source: "classify", target: "confidence" },
+          { source: "confidence", target: "draft_response", label: "high" },
+          { source: "confidence", target: "escalate", label: "low" },
+          { source: "draft_response", target: "audit" },
+          { source: "escalate", target: "audit" },
+        ],
+      }),
+    },
+  });
+
   const run = await prisma.workflowRun.create({
     data: {
       id: "run-001",
