@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TemplatesTab } from "./_components/templates-tab";
 import { RunsTab } from "./_components/runs-tab";
+import { ChatPanel } from "./_components/chat-panel";
 
 export default function WorkflowsPage() {
   return (
@@ -31,6 +32,8 @@ export default function WorkflowsPage() {
           </Suspense>
         </TabsContent>
       </Tabs>
+
+      <ChatPanel />
     </div>
   );
 }

@@ -20,24 +20,28 @@ const HEADER_MAP: Record<string, string> = {
   reference: "reference",
   nomor: "reference",
   no: "reference",
+  saldo: "balance",
+  balance: "balance",
 };
 
 /* -- Stub AI classifier (deterministic keyword matching) ---------- */
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  revenue: ["shopee", "tokopedia", "shopify", "penjualan", "sale", "order", "payment received"],
-  cogs: ["bahan", "roast", "bean", "kopi", "susu", "gula", "kemasan", "packaging", "raw material"],
-  opex: ["gaji", "salary", "listrik", "electric", "sewa", "rent", "internet", "transport", "grab", "gojek"],
-  marketing: ["iklan", "ads", "promo", "diskon", "discount", "campaign", "meta", "google ads"],
-  logistics: ["ongkir", "shipping", "jne", "jnt", "sicepat", "anteraja", "kurir", "courier"],
-  tax: ["pajak", "ppn", "pph", "tax"],
-  other: [],
+  "Revenue - Online Sales": ["shopee", "tokopedia", "shopify", "penjualan", "sale", "order", "payment received", "switching cr"],
+  "COGS - Raw Materials": ["bahan", "kain", "cotton", "benang", "resleting", "zipper", "raw material"],
+  "COGS - Production Services": ["sablon", "printing", "jahit", "sewing"],
+  "COGS - Packaging": ["kemasan", "packaging"],
+  "Operating Expense - General": ["gaji", "salary", "listrik", "electric", "sewa", "rent", "internet", "transport", "grab", "gojek"],
+  "Marketing Expense": ["iklan", "ads", "promo", "diskon", "discount", "campaign", "meta", "google ads"],
+  "Logistics - Shipping": ["ongkir", "shipping", "jne", "jnt", "sicepat", "anteraja", "kurir", "courier"],
+  "Tax & Compliance": ["pajak", "ppn", "pph", "tax"],
+  "Other": [],
 };
 
 function classifyTransaction(description: string): { category: string; confidence: number; rationale: string } {
   const desc = description.toLowerCase();
 
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
-    if (category === "other") continue;
+    if (category === "Other") continue;
     for (const kw of keywords) {
       if (desc.includes(kw)) {
         return {
@@ -50,7 +54,7 @@ function classifyTransaction(description: string): { category: string; confidenc
   }
 
   return {
-    category: "other",
+    category: "Other",
     confidence: 0.35,
     rationale: "No keyword match found — requires human review",
   };
@@ -105,9 +109,14 @@ export async function POST(req: NextRequest) {
     const batchId = `BATCH-${Date.now()}`;
     const threshold = await getConfidenceThreshold();
 
-    const results = { posted: 0, review: 0, skipped: 0, entries: [] as Array<{ description: string; category: string; confidence: number; status: string }> };
+    const results = { posted: 0, review: 0, skipped: 0, duplicates: 0, entries: [] as Array<{ description: string; category: string; confidence: number; status: string }> };
 
-    const existingRefs = new Set<string>();
+    const existingTxns = await prisma.transactionRaw.findMany({
+      select: { date: true, description: true, debit: true, credit: true },
+    });
+    const existingRefs = new Set<string>(
+      existingTxns.map(t => `${t.date.toISOString().slice(0, 10)}-${t.description}-${t.debit}-${t.credit}`)
+    );
 
     for (const rawRow of rows) {
       const row = normalizeHeaders(rawRow);
@@ -125,8 +134,10 @@ export async function POST(req: NextRequest) {
         continue;
       }
 
-      const dedupKey = `${row.date}-${row.description}-${debit}-${credit}`;
+      const parsedDate = parseDate(row.date);
+      const dedupKey = `${parsedDate.toISOString().slice(0, 10)}-${row.description}-${debit}-${credit}`;
       if (existingRefs.has(dedupKey)) {
+        results.duplicates++;
         results.skipped++;
         continue;
       }
@@ -226,7 +237,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       batchId,
-      ...results,
+      posted: results.posted,
+      review: results.review,
+      skipped: results.skipped,
+      duplicates: results.duplicates,
+      entries: results.entries,
       total: rows.length,
     });
   } catch (err) {

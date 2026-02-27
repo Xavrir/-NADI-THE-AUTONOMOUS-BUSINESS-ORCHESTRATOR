@@ -42,14 +42,26 @@ const navItems: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(() => {
+    if (typeof window !== "undefined") {
+      const cached = sessionStorage.getItem("nadi_user");
+      if (cached) return JSON.parse(cached);
+    }
+    return null;
+  });
 
   useEffect(() => {
+    if (user) return;
     fetch("/api/auth/me")
       .then((r) => r.json())
-      .then((d) => { if (d.user) setUser(d.user); })
+      .then((d) => {
+        if (d.user) {
+          setUser(d.user);
+          sessionStorage.setItem("nadi_user", JSON.stringify(d.user));
+        }
+      })
       .catch(() => {});
-  }, []);
+  }, [user]);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });

@@ -106,15 +106,24 @@ function extractJSON(text: string): Record<string, unknown> | null {
 async function callPollinations(
   systemPrompt: string,
   userPrompt: string,
-  model: string = "openai"
+  model: string = "openai-large"
 ): Promise<{ content: string; model: string; latencyMs: number }> {
   const start = Date.now();
 
-  const res = await fetch("https://text.pollinations.ai/openai", {
+  const apiKey = process.env.POLLINATIONS_API_KEY;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+
+  const endpoint = apiKey
+    ? "https://gen.pollinations.ai/v1/chat/completions"
+    : "https://text.pollinations.ai/openai";
+  const resolvedModel = apiKey ? model : "openai-fast";
+
+  const res = await fetch(endpoint, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify({
-      model,
+      model: resolvedModel,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -136,21 +145,61 @@ async function callPollinations(
 }
 
 function generateStubResponse(task: string, context: Record<string, unknown>): LLMResponse {
-  const baseConfidence = 0.85 + ((task.length + JSON.stringify(context).length) % 10) * 0.012;
-  const confidence = Math.min(0.98, Math.max(0.60, baseConfidence));
+  // Hash context for deterministic but diverse confidence values
+  const contextStr = JSON.stringify(context);
+  let hash = 0;
+  for (let i = 0; i < contextStr.length; i++) {
+    hash = ((hash << 5) - hash + contextStr.charCodeAt(i)) | 0;
+  }
+  const hashNorm = (Math.abs(hash) % 100) / 100;
 
-  const categoryMap: Record<string, string> = {
-    classify_ledger_row: "COGS - Raw Materials",
-    draft_content_strategy: "Weekly social media push",
-    classify_general: "auto_classified",
-  };
+  let confidence: number;
+  if (task === "classify_ledger_row") {
+    // Range 0.78–0.97: some transactions pass 0.90 threshold, some don't
+    confidence = 0.78 + hashNorm * 0.19;
+  } else if (task === "classify_order_action") {
+    // Range 0.72–0.95
+    confidence = 0.72 + hashNorm * 0.23;
+  } else if (task === "draft_content_strategy") {
+    confidence = 0.82 + hashNorm * 0.14;
+  } else {
+    confidence = 0.80 + hashNorm * 0.15;
+  }
+  confidence = Math.min(0.98, Math.max(0.60, confidence));
+
+  const data: Record<string, unknown> = { confidence };
+
+  if (task === "classify_ledger_row") {
+    const desc = ((context.description as string) ?? "").toLowerCase();
+    if (desc.includes("penjualan") || desc.includes("revenue") || desc.includes("shopify") || desc.includes("settlement")) {
+      data.category = "Revenue - Online Sales";
+    } else if (desc.includes("sablon") || desc.includes("jahit")) {
+      data.category = "COGS - Production Services";
+    } else if (desc.includes("packaging") || desc.includes("box")) {
+      data.category = "COGS - Packaging";
+    } else if (desc.includes("kain") || desc.includes("bahan") || desc.includes("pembelian")) {
+      data.category = "COGS - Raw Materials";
+    } else {
+      data.category = "Other Expense";
+    }
+    data.classification = data.category;
+  } else if (task === "classify_order_action") {
+    const stockStatus = ((context.stockStatus as string) ?? "").toLowerCase();
+    data.action = stockStatus.includes("low") || stockStatus.includes("out") ? "hold" : "fulfill";
+    data.classification = data.action;
+    data.category = data.action;
+  } else if (task === "draft_content_strategy") {
+    data.strategy = `Weekly ${(context.topic as string) ?? "streetwear"} campaign — target Gen Z via TikTok + IG Reels`;
+    data.platforms = ["tiktok", "instagram", "shopee"];
+    data.category = "content_strategy";
+    data.classification = "content_strategy";
+  } else {
+    data.category = "auto_classified";
+    data.classification = "auto_classified";
+  }
 
   return {
-    data: {
-      category: categoryMap[task] ?? "unclassified",
-      classification: categoryMap[task] ?? "auto_classified",
-      confidence,
-    },
+    data,
     confidence,
     rationale: `Deterministic stub for task "${task}" — no LLM call made`,
     rawContent: "",

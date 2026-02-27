@@ -1,6 +1,25 @@
-import { PrismaClient } from "@prisma/client";
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-const prisma = new PrismaClient();
+import { PrismaClient } from "@prisma/client";
+import { PrismaLibSQL } from "@prisma/adapter-libsql";
+
+function createSeedClient(): PrismaClient {
+  const tursoUrl = process.env.TURSO_DATABASE_URL;
+  const tursoToken = process.env.TURSO_AUTH_TOKEN;
+
+  if (tursoUrl && tursoToken) {
+    console.log("Seeding with Turso:", tursoUrl.slice(0, 40) + "...");
+    const adapter = new PrismaLibSQL({ url: tursoUrl, authToken: tursoToken });
+    return new PrismaClient({ adapter } as never);
+  }
+
+  console.log("Seeding with local SQLite");
+  return new PrismaClient();
+}
+
+const prisma = createSeedClient();
 
 function eid(suffix: string) {
   return `EVD-2026-${suffix}`;
@@ -72,14 +91,17 @@ async function main() {
   const yesterday = new Date(now.getTime() - 86400000);
   const twoDaysAgo = new Date(now.getTime() - 172800000);
 
+  // Seed transactions: net positive cash (credits 12,593K - debits 5,350K = +7,243K)
   await prisma.transactionRaw.createMany({
     data: [
       { id: "txn-001", date: twoDaysAgo, description: "Pembelian kain cotton combed 30s 100m", debit: 3200000, credit: 0, reference: "INV-2026-0041", source: "csv", importBatch: "batch-001" },
-      { id: "txn-002", date: twoDaysAgo, description: "Penjualan Shopify #1042 Oversized Tee x3 + Cap x2", debit: 0, credit: 825000, reference: "SHP-1042", source: "csv", importBatch: "batch-001" },
+      { id: "txn-002", date: twoDaysAgo, description: "Penjualan Shopify #1042 Oversized Tee x8 + Cap x5", debit: 0, credit: 2157000, reference: "SHP-1042", source: "csv", importBatch: "batch-001" },
       { id: "txn-003", date: yesterday, description: "Bayar jasa sablon DTG 200 pcs", debit: 1400000, credit: 0, reference: "SUP-DTG-0127", source: "csv", importBatch: "batch-001" },
-      { id: "txn-004", date: yesterday, description: "Transfer dari Tokopedia settlement", debit: 0, credit: 2850000, reference: "TKP-STL-0127", source: "csv", importBatch: "batch-001" },
+      { id: "txn-004", date: yesterday, description: "Transfer dari Tokopedia settlement", debit: 0, credit: 4850000, reference: "TKP-STL-0127", source: "csv", importBatch: "batch-001" },
       { id: "txn-005", date: now, description: "Beli packaging box custom 500 pcs", debit: 750000, credit: 0, reference: "SUP-PKG-005", source: "csv", importBatch: "batch-002" },
-      { id: "txn-006", date: now, description: "Penjualan TikTok Shop Hoodie x2", debit: 0, credit: 918000, reference: "TTS-0227-01", source: "manual" },
+      { id: "txn-006", date: now, description: "Penjualan TikTok Shop Hoodie x2 + Track Shorts x3", debit: 0, credit: 1575000, reference: "TTS-0227-01", source: "manual" },
+      { id: "txn-007", date: now, description: "Penjualan Shopify #1058 Cargo Jogger x3 + Graphic Tee x4", debit: 0, credit: 1683000, reference: "SHP-1058", source: "csv", importBatch: "batch-002" },
+      { id: "txn-008", date: yesterday, description: "Penjualan Shopify #1055 Sling Bag x4 + Snapback Cap x6", debit: 0, credit: 1890000, reference: "SHP-1055", source: "csv", importBatch: "batch-001" },
     ],
   });
 
@@ -89,8 +111,10 @@ async function main() {
       { transactionId: "txn-002", category: "Revenue - Online Sales", confidence: 0.98, evidenceId: eid("000002"), status: "posted", aiRationale: "Shopify order reference detected — multi-item sale" },
       { transactionId: "txn-003", category: "COGS - Production Services", confidence: 0.94, evidenceId: eid("000003"), status: "posted", aiRationale: "DTG printing service matches production cost pattern" },
       { transactionId: "txn-004", category: "Revenue - Platform Settlement", confidence: 0.92, evidenceId: eid("000004"), status: "posted", aiRationale: "Tokopedia settlement transfer pattern" },
-      { transactionId: "txn-005", category: "COGS - Packaging", confidence: 0.68, evidenceId: eid("000005"), status: "review", aiRationale: "Custom packaging could be COGS or marketing expense — low confidence" },
-      { transactionId: "txn-006", category: "Revenue - Online Sales", confidence: 0.62, evidenceId: eid("000006"), status: "review", aiRationale: "TikTok Shop sale without structured reference — needs review" },
+      { transactionId: "txn-005", category: "COGS - Packaging", confidence: 0.68, evidenceId: eid("000005"), status: "needs_review", aiRationale: "Custom packaging could be COGS or marketing expense — low confidence" },
+      { transactionId: "txn-006", category: "Revenue - Online Sales", confidence: 0.62, evidenceId: eid("000006"), status: "needs_review", aiRationale: "TikTok Shop sale without structured reference — needs review" },
+      { transactionId: "txn-007", category: "Revenue - Online Sales", confidence: 0.97, evidenceId: eid("000007"), status: "posted", aiRationale: "Shopify multi-item order with valid reference" },
+      { transactionId: "txn-008", category: "Revenue - Online Sales", confidence: 0.96, evidenceId: eid("000008"), status: "posted", aiRationale: "Shopify order with valid reference — Sling Bag + Snapback" },
     ],
   });
 
@@ -193,7 +217,7 @@ async function main() {
           { id: "trigger", type: "trigger", label: "CSV Import", config: { triggerType: "csv_import" } },
           { id: "normalize", type: "logic", label: "Normalize & Dedupe", config: { task: "normalize_deduplicate" } },
           { id: "classify", type: "ai", label: "AI Classification", config: { task: "classify_ledger_row" } },
-          { id: "conf_gate", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.9 } },
+          { id: "conf_gate", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.85 } },
           { id: "post", type: "execute", label: "Post to Ledger", config: { actionType: "post_ledger_entries" } },
           { id: "review", type: "execute", label: "Route to Review", config: { actionType: "create_review_item" } },
           { id: "audit", type: "audit", label: "Write Audit", config: { eventType: "workflow_executed" } },
@@ -397,6 +421,36 @@ async function main() {
     },
   });
 
+  await prisma.workflowTemplate.create({
+    data: {
+      id: "tpl-wa-automation",
+      name: "WhatsApp Automation",
+      description: "Auto-send WhatsApp notifications for order confirmations, shipping updates, and delivery alerts",
+      version: 1,
+      configJson: JSON.stringify({
+        entryNodeId: "trigger",
+        nodes: [
+          { id: "trigger", type: "trigger", label: "Order Event", config: { triggerType: "wa_event" } },
+          { id: "build_msg", type: "logic", label: "Build Message", config: { task: "build_wa_payload" } },
+          { id: "classify", type: "ai", label: "AI Priority Check", config: { task: "classify_general" } },
+          { id: "conf_gate", type: "confidence_gate", label: "Confidence Gate", config: { threshold: 0.80 } },
+          { id: "send", type: "execute", label: "Send WhatsApp", config: { actionType: "send_wa_message" } },
+          { id: "queue", type: "execute", label: "Queue Manual Send", config: { actionType: "queue_wa_manual" } },
+          { id: "audit", type: "audit", label: "Write Audit", config: { eventType: "wa_notification_sent" } },
+        ],
+        edges: [
+          { source: "trigger", target: "build_msg" },
+          { source: "build_msg", target: "classify" },
+          { source: "classify", target: "conf_gate" },
+          { source: "conf_gate", target: "send", label: "high" },
+          { source: "conf_gate", target: "queue", label: "low" },
+          { source: "send", target: "audit" },
+          { source: "queue", target: "audit" },
+        ],
+      }),
+    },
+  });
+
   const run = await prisma.workflowRun.create({
     data: {
       id: "run-001",
@@ -439,6 +493,7 @@ async function main() {
       { type: "csv_importer", name: "Bank CSV Importer", status: "active" },
       { type: "tokopedia", name: "Tokopedia Seller", status: "inactive" },
       { type: "tiktok_shop", name: "TikTok Shop", status: "inactive" },
+      { type: "whatsapp", name: "WhatsApp Business", status: "active", configJson: JSON.stringify({ phone: "+6281234567890", provider: "wa_business_api" }) },
     ],
   });
 

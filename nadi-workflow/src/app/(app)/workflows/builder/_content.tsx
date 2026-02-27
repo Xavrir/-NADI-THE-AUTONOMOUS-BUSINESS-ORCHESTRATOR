@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -18,7 +18,7 @@ import {
   BackgroundVariant,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Play, Loader2, ArrowLeft, Zap, GitBranch, Brain, ShieldCheck, AlertTriangle, FileText } from "lucide-react";
+import { Play, Loader2, ArrowLeft, Zap, GitBranch, Brain, ShieldCheck, AlertTriangle, FileText, CheckCircle2, XCircle, Clock } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,18 @@ interface TemplateData {
   name: string;
   description: string | null;
   configJson: TemplateConfig;
+}
+
+interface NodeRunData {
+  nodeId: string;
+  status: string;
+  outputJson?: Record<string, unknown> | null;
+}
+
+interface RunData {
+  id: string;
+  status: string;
+  nodeRuns: NodeRunData[];
 }
 
 const nodeTypes = { workflowNode: WorkflowNode };
@@ -116,6 +128,13 @@ function layoutEdges(configEdges: TemplateConfig["edges"]): Edge[] {
   }));
 }
 
+function mapNodeRunStatus(status: string): "idle" | "running" | "completed" | "failed" {
+  if (status === "completed") return "completed";
+  if (status === "failed") return "failed";
+  if (status === "running" || status === "awaiting_approval") return "running";
+  return "idle";
+}
+
 export function WorkflowBuilderContent() {
   const searchParams = useSearchParams();
   const templateId = searchParams.get("template") ?? "tpl-finance-close";
@@ -123,6 +142,10 @@ export function WorkflowBuilderContent() {
 
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [showInspector, setShowInspector] = useState(false);
+  const [activeRunId, setActiveRunId] = useState<string | null>(null);
+  const [runStatus, setRunStatus] = useState<"idle" | "running" | "completed" | "failed" | "awaiting_approval">("idle");
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: template, isLoading } = useQuery<TemplateData>({
     queryKey: ["workflow-template", templateId],
@@ -152,14 +175,115 @@ export function WorkflowBuilderContent() {
     }
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
-  const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
-    setSelectedNode(node);
-    setShowInspector(true);
+  const applyRunState = useCallback(
+    (runData: RunData) => {
+      const completedNodeIds = new Set<string>();
+      const runningNodeIds = new Set<string>();
+
+      setNodes((prev) =>
+        prev.map((node) => {
+          const nodeRun = runData.nodeRuns.find((nr) => nr.nodeId === node.id);
+          const status = nodeRun ? mapNodeRunStatus(nodeRun.status) : "idle";
+          if (status === "completed") completedNodeIds.add(node.id);
+          if (status === "running") runningNodeIds.add(node.id);
+          return { ...node, data: { ...node.data, status } };
+        })
+      );
+
+      setEdges((prev) =>
+        prev.map((edge) => {
+          if (completedNodeIds.has(edge.source)) {
+            return {
+              ...edge,
+              animated: false,
+              style: { ...edge.style, stroke: "var(--success)" },
+              markerEnd: { type: MarkerType.ArrowClosed, color: "var(--success)", width: 16, height: 16 },
+            };
+          }
+          if (runningNodeIds.has(edge.source)) {
+            return {
+              ...edge,
+              animated: true,
+              style: { ...edge.style, stroke: "var(--primary)" },
+              markerEnd: { type: MarkerType.ArrowClosed, color: "var(--primary)", width: 16, height: 16 },
+            };
+          }
+          return {
+            ...edge,
+            animated: false,
+            style: { ...edge.style, stroke: "var(--border)" },
+            markerEnd: { type: MarkerType.ArrowClosed, color: "var(--border)", width: 16, height: 16 },
+          };
+        })
+      );
+    },
+    [setNodes, setEdges]
+  );
+
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
   }, []);
 
-  const onPaneClick = useCallback(() => {
-    setSelectedNode(null);
-  }, []);
+  const resetCanvas = useCallback(() => {
+    resetTimerRef.current = setTimeout(() => {
+      setNodes((prev) =>
+        prev.map((node) => ({ ...node, data: { ...node.data, status: "idle" } }))
+      );
+      setEdges((prev) =>
+        prev.map((edge) => ({
+          ...edge,
+          animated: false,
+          style: { ...edge.style, stroke: "var(--border)" },
+          markerEnd: { type: MarkerType.ArrowClosed, color: "var(--border)", width: 16, height: 16 },
+        }))
+      );
+      setRunStatus("idle");
+      setActiveRunId(null);
+    }, 4000);
+  }, [setNodes, setEdges]);
+
+  const startPolling = useCallback(
+    (runId: string) => {
+      stopPolling();
+
+      const poll = async () => {
+        try {
+          const res = await fetch(`/api/workflows/runs/${runId}`);
+          if (!res.ok) return;
+          const data: RunData = await res.json();
+
+          applyRunState(data);
+
+          const terminal = data.status === "completed" || data.status === "failed";
+          const paused = data.status === "awaiting_approval";
+
+          if (terminal || paused) {
+            setRunStatus(data.status as typeof runStatus);
+            stopPolling();
+            queryClient.invalidateQueries({ queryKey: ["workflow-runs"] });
+            queryClient.invalidateQueries({ queryKey: ["audit"] });
+            if (terminal) resetCanvas();
+          }
+        } catch {
+          // network error — keep polling
+        }
+      };
+
+      poll();
+      pollingRef.current = setInterval(poll, 400);
+    },
+    [stopPolling, applyRunState, queryClient, resetCanvas]
+  );
+
+  useEffect(() => {
+    return () => {
+      stopPolling();
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    };
+  }, [stopPolling]);
 
   const runMutation = useMutation({
     mutationFn: async () => {
@@ -169,60 +293,44 @@ export function WorkflowBuilderContent() {
         body: JSON.stringify({ templateId, triggerType: "manual" }),
       });
       if (!res.ok) throw new Error(await res.text());
-      return res.json();
+      return res.json() as Promise<{ id: string; status: string }>;
     },
     onMutate: () => {
-      if (!template) return;
-      const configNodes = template.configJson.nodes;
-      configNodes.forEach((n, i) => {
-        setTimeout(() => {
-          setNodes((prev) =>
-            prev.map((node) =>
-              node.id === n.id ? { ...node, data: { ...node.data, status: "running" } } : node
-            )
-          );
-          setEdges((prev) =>
-            prev.map((edge) =>
-              edge.source === n.id
-                ? { ...edge, animated: true, style: { ...edge.style, stroke: "var(--primary)" } }
-                : edge
-            )
-          );
-        }, i * 600);
-        setTimeout(() => {
-          setNodes((prev) =>
-            prev.map((node) =>
-              node.id === n.id ? { ...node, data: { ...node.data, status: "completed" } } : node
-            )
-          );
-          setEdges((prev) =>
-            prev.map((edge) =>
-              edge.source === n.id
-                ? { ...edge, animated: false, style: { ...edge.style, stroke: "var(--success)" } }
-                : edge
-            )
-          );
-        }, i * 600 + 500);
-      });
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current);
+        resetTimerRef.current = null;
+      }
+      setRunStatus("running");
+      setNodes((prev) =>
+        prev.map((node) => ({ ...node, data: { ...node.data, status: "idle" } }))
+      );
+      setEdges((prev) =>
+        prev.map((edge) => ({
+          ...edge,
+          animated: false,
+          style: { ...edge.style, stroke: "var(--border)" },
+          markerEnd: { type: MarkerType.ArrowClosed, color: "var(--border)", width: 16, height: 16 },
+        }))
+      );
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workflow-runs"] });
-      queryClient.invalidateQueries({ queryKey: ["audit"] });
-      const delay = (template?.configJson.nodes.length ?? 0) * 600 + 1500;
-      setTimeout(() => {
-        setNodes((prev) =>
-          prev.map((node) => ({ ...node, data: { ...node.data, status: "idle" } }))
-        );
-        setEdges((prev) =>
-          prev.map((edge) => ({
-            ...edge,
-            animated: false,
-            style: { ...edge.style, stroke: "var(--border)" },
-          }))
-        );
-      }, delay);
+    onSuccess: (data) => {
+      setActiveRunId(data.id);
+      startPolling(data.id);
+    },
+    onError: () => {
+      setRunStatus("failed");
+      setTimeout(() => setRunStatus("idle"), 3000);
     },
   });
+
+  const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    setSelectedNode(node);
+    setShowInspector(true);
+  }, []);
+
+  const onPaneClick = useCallback(() => {
+    setSelectedNode(null);
+  }, []);
 
   if (isLoading) {
     return (
@@ -232,6 +340,8 @@ export function WorkflowBuilderContent() {
       </div>
     );
   }
+
+  const isRunning = runStatus === "running" || runMutation.isPending;
 
   return (
     <div className="flex h-full flex-col">
@@ -248,10 +358,10 @@ export function WorkflowBuilderContent() {
             </Link>
             <Button
               onClick={() => runMutation.mutate()}
-              disabled={runMutation.isPending || !template?.configJson.nodes.length}
+              disabled={isRunning || !template?.configJson.nodes.length}
               className="btn-glow gap-1.5 bg-[var(--primary)] text-white hover:opacity-90"
             >
-              {runMutation.isPending ? (
+              {isRunning ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Running...</>
               ) : (
                 <><Play className="h-4 w-4" /> Run Workflow</>
@@ -260,6 +370,54 @@ export function WorkflowBuilderContent() {
           </div>
         }
       />
+
+      {/* Run Status Bar */}
+      {runStatus !== "idle" && (
+        <div className="flex h-8 items-center gap-2 border-b border-[var(--border)] bg-[var(--surface)] px-4">
+          {runStatus === "running" && (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--primary)]" />
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--primary)]">
+                Executing workflow...
+              </span>
+            </>
+          )}
+          {runStatus === "completed" && (
+            <>
+              <CheckCircle2 className="h-3.5 w-3.5 text-[var(--success)]" />
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--success)]">
+                Workflow completed
+              </span>
+              {activeRunId && (
+                <span className="ml-auto font-mono text-[10px] text-[var(--text-muted)]">
+                  {activeRunId}
+                </span>
+              )}
+            </>
+          )}
+          {runStatus === "failed" && (
+            <>
+              <XCircle className="h-3.5 w-3.5 text-[var(--danger)]" />
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--danger)]">
+                Workflow failed
+              </span>
+            </>
+          )}
+          {runStatus === "awaiting_approval" && (
+            <>
+              <Clock className="h-3.5 w-3.5 text-amber-400" />
+              <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400">
+                Awaiting approval
+              </span>
+              {activeRunId && (
+                <span className="ml-auto font-mono text-[10px] text-[var(--text-muted)]">
+                  {activeRunId}
+                </span>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       <div className="flex h-8 items-center gap-4 border-y border-[var(--border)] bg-[var(--surface)] px-4">
         <div className="flex items-center gap-1.5">

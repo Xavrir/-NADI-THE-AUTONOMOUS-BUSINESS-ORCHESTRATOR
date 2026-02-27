@@ -20,15 +20,33 @@ interface ReviewItem {
 const categories = [
   "COGS - Raw Materials",
   "COGS - Packaging",
+  "COGS - Production Services",
   "Revenue - Online Sales",
   "Revenue - Platform Settlement",
   "Revenue - Walk-in",
-  "Operating Expense - Utilities",
-  "Operating Expense - Rent",
-  "Operating Expense - Labor",
+  "Operating Expense - General",
   "Marketing Expense",
+  "Logistics - Shipping",
+  "Tax & Compliance",
   "Other",
 ];
+
+const ACTION_LABELS: Record<string, string> = {
+  manual_review_required: "Manual Review Required",
+  fulfill: "Order Fulfillment",
+  hold: "Order Held",
+  hold_for_review: "Order Held for Review",
+  auto_resolve_low_risk: "Auto-Resolved (Low Risk)",
+  draft_price_change: "Price Change Draft",
+  apply_price_change: "Price Change Applied",
+  create_restock_order: "Restock Order",
+  send_wa_message: "WhatsApp Notification",
+  queue_wa_manual: "WhatsApp Manual Queue",
+  draft_cs_response: "CS Response Draft",
+  export_content_csv: "Content Export",
+  post_ledger_entries: "Ledger Posted",
+  create_review_item: "Review Required",
+};
 
 export function ReviewTab() {
   const queryClient = useQueryClient();
@@ -75,7 +93,10 @@ export function ReviewTab() {
           <div className="flex-1 space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-[var(--text-primary)]">
-                {item.suggestedJson.category ?? item.suggestedJson.action ?? "Unknown"}
+                {item.suggestedJson.category
+                  ?? ACTION_LABELS[item.suggestedJson.action ?? ""] 
+                  ?? item.suggestedJson.action?.replace(/_/g, " ") 
+                  ?? "Unknown"}
               </span>
               <StatusChip
                 variant={item.status === "pending" ? "warning" : "success"}

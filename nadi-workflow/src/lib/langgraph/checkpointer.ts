@@ -1,5 +1,9 @@
 import { SqliteSaver } from "@langchain/langgraph-checkpoint-sqlite";
+import { MemorySaver } from "@langchain/langgraph";
+import type { BaseCheckpointSaver } from "@langchain/langgraph";
 import path from "path";
+
+const IS_SERVERLESS = !!process.env.TURSO_DATABASE_URL;
 
 const CHECKPOINT_DB_PATH = path.join(
   process.cwd(),
@@ -7,11 +11,13 @@ const CHECKPOINT_DB_PATH = path.join(
   "langgraph-checkpoints.db"
 );
 
-let _checkpointer: SqliteSaver | null = null;
+let _checkpointer: BaseCheckpointSaver | null = null;
 
-export function getCheckpointer(): SqliteSaver {
+export function getCheckpointer(): BaseCheckpointSaver {
   if (!_checkpointer) {
-    _checkpointer = SqliteSaver.fromConnString(CHECKPOINT_DB_PATH);
+    _checkpointer = IS_SERVERLESS
+      ? new MemorySaver()
+      : SqliteSaver.fromConnString(CHECKPOINT_DB_PATH);
   }
   return _checkpointer;
 }

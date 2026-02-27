@@ -33,6 +33,8 @@ const riskVariant = (risk: string) => {
 const LABELS: Record<string, string> = {
   netMarginPct: "MARGIN",
   price: "PRICE",
+  cogs: "COGS",
+  feePct: "FEE",
   orderQty: "QTY",
   available: "STOCK",
   discount: "DISCOUNT",
@@ -59,7 +61,7 @@ function renderDiffChips(before: Record<string, unknown> | null, after: Record<s
   const formatValue = (key: string, val: unknown) => {
     if (val === undefined || val === null) return "N/A";
     if (typeof val === "number") {
-      if (key.toLowerCase().includes("price") || key.toLowerCase().includes("cost")) {
+      if (key.toLowerCase().includes("price") || key.toLowerCase().includes("cost") || key.toLowerCase() === "cogs") {
         return formatIDR(val);
       }
       if (key.toLowerCase().includes("pct") || key.toLowerCase().includes("margin")) {
