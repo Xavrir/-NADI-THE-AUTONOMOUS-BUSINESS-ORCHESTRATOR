@@ -15,6 +15,7 @@
 import { prisma } from "@/lib/db";
 import { writeAudit } from "@/lib/audit";
 import { generateEvidenceId } from "@/lib/utils";
+import { generateJSON } from "@/lib/llm-provider";
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -104,10 +105,33 @@ function topologicalSort(nodes: NodeConfig[], edges: EdgeConfig[], entryId?: str
   return sorted;
 }
 
-// ─── Node Executors (deterministic stubs) ─────────────────────────
+// ─── Sample Data for Demo ─────────────────────────────────────────
+
+const SAMPLE_TRANSACTIONS = [
+  { description: "Pembelian biji kopi Arabica Gayo 50kg", debit: 4250000, credit: 0, reference: "PO-2026-0142" },
+  { description: "Penjualan latte oat milk x12 via Grab", debit: 0, credit: 540000, reference: "GRB-26022701" },
+  { description: "Bayar listrik toko Februari", debit: 875000, credit: 0, reference: "PLN-FEB-2026" },
+  { description: "Revenue Shopify order #SH-4421 espresso beans 1kg x5", debit: 0, credit: 1125000, reference: "SH-4421" },
+  { description: "Gaji part-time barista Minggu ke-4", debit: 1200000, credit: 0, reference: "HR-W4-FEB26" },
+];
+
+// ─── Node Executors ───────────────────────────────────────────────
 
 async function executeTrigger(node: NodeConfig, ctx: RunContext): Promise<NodeResult> {
   const triggerType = (node.config?.triggerType as string) ?? ctx.triggerType;
+
+  // Inject sample transaction for demo so downstream AI nodes have real context
+  if (triggerType === "csv_import") {
+    const sample = SAMPLE_TRANSACTIONS[Math.floor(Math.random() * SAMPLE_TRANSACTIONS.length)];
+    ctx.data = {
+      ...ctx.data,
+      description: sample.description,
+      debit: sample.debit,
+      credit: sample.credit,
+      reference: sample.reference,
+    };
+  }
+
   return {
     status: "completed",
     output: {
@@ -115,6 +139,7 @@ async function executeTrigger(node: NodeConfig, ctx: RunContext): Promise<NodeRe
       triggerType,
       message: `Trigger activated: ${triggerType}`,
       timestamp: new Date().toISOString(),
+      sampleData: triggerType === "csv_import" ? ctx.data : undefined,
     },
     evidence: {
       evidenceId: generateEvidenceId(),
@@ -143,28 +168,37 @@ async function executeLogic(node: NodeConfig, ctx: RunContext): Promise<NodeResu
 }
 
 async function executeAIDecision(node: NodeConfig, ctx: RunContext): Promise<NodeResult> {
-  // Deterministic stub: confidence derived from stable hash of template+node
   const task = (node.config?.task as string) ?? "classify";
-  const baseConfidence = 0.85 + (node.id.length % 10) * 0.012; // deterministic from node ID
-  const confidence = Math.min(0.98, Math.max(0.60, baseConfidence));
 
-  ctx.confidence = confidence;
+  const llmResult = await generateJSON({
+    task,
+    prompt: "",
+    context: { ...ctx.data, templateName: ctx.templateName, nodeLabel: node.label },
+  });
+
+  ctx.confidence = llmResult.confidence;
 
   return {
     status: "completed",
     output: {
       label: node.label,
       task,
-      message: `AI classification completed with confidence ${(confidence * 100).toFixed(1)}%`,
-      data: { task, classification: "auto", items: ctx.data.itemCount ?? 6 },
-      confidence,
-      rationale: `Deterministic stub: ${task} applied to ${Object.keys(ctx.data).length} context keys`,
+      message: `AI ${task} completed with confidence ${(llmResult.confidence * 100).toFixed(1)}% [${llmResult.provider}/${llmResult.model}]`,
+      data: llmResult.data,
+      confidence: llmResult.confidence,
+      rationale: llmResult.rationale,
+      provider: llmResult.provider,
+      model: llmResult.model,
+      latencyMs: llmResult.latencyMs,
     },
     evidence: {
-      evidenceId: generateEvidenceId(),
-      provider: "stub",
+      evidenceId: llmResult.evidenceId,
+      provider: llmResult.provider,
+      model: llmResult.model,
       task,
-      confidence,
+      confidence: llmResult.confidence,
+      promptVersion: llmResult.promptVersion,
+      latencyMs: llmResult.latencyMs,
     },
   };
 }

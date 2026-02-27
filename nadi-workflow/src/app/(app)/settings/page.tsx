@@ -1,7 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { ShoppingBag, Truck, CreditCard, BarChart3, Plug, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ShoppingBag, Truck, CreditCard, BarChart3, Plug, RefreshCw, Brain } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,10 +39,34 @@ const statusMap: Record<string, { variant: "success" | "warning" | "neutral"; la
 };
 
 export default function SettingsPage() {
+  const queryClient = useQueryClient();
+  const [isToggling, setIsToggling] = useState(false);
+
   const { data: connectors, isLoading } = useQuery<Connector[]>({
     queryKey: ["integrations"],
     queryFn: () => fetch("/api/settings/integrations").then((r) => r.json()),
   });
+
+  const { data: llmSettings, isLoading: isLlmLoading } = useQuery<{ provider: "stub" | "pollinations" }>({
+    queryKey: ["llm-provider"],
+    queryFn: () => fetch("/api/settings/llm-provider").then((r) => r.json()),
+  });
+
+  const handleToggleProvider = async (provider: "stub" | "pollinations") => {
+    setIsToggling(true);
+    try {
+      await fetch("/api/settings/llm-provider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider }),
+      });
+      await queryClient.invalidateQueries({ queryKey: ["llm-provider"] });
+    } catch (error) {
+      console.error("Failed to toggle provider:", error);
+    } finally {
+      setIsToggling(false);
+    }
+  };
 
   return (
     <div>
@@ -123,6 +148,87 @@ export default function SettingsPage() {
           )}
         </section>
 
+        <section>
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
+            <Brain className="h-4 w-4 text-[var(--primary)]" />
+            AI Engine
+          </h2>
+
+          <div className="card-elevated p-5">
+            {isLlmLoading ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div 
+                  className={`flex flex-col justify-between border p-4 rounded-sm transition-all ${
+                    llmSettings?.provider === "stub" 
+                      ? "border-[var(--primary)] bg-[var(--primary)]/5 shadow-[4px_4px_0px_0px_var(--primary)]" 
+                      : "border-[var(--border)] shadow-[4px_4px_0px_0px_var(--background)]"
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-mono text-xs font-bold uppercase tracking-tight">Stub (Deterministic)</h3>
+                      {llmSettings?.provider === "stub" && <StatusChip variant="neutral" label="Active" />}
+                    </div>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      Deterministic responses for testing. No external API calls.
+                    </p>
+                  </div>
+                  
+                  {llmSettings?.provider !== "stub" && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-4 w-full rounded-sm border-[var(--border)] font-mono uppercase tracking-tighter"
+                      onClick={() => handleToggleProvider("stub")}
+                      disabled={isToggling}
+                    >
+                      {isToggling ? "Switching..." : "Switch"}
+                    </Button>
+                  )}
+                </div>
+
+                <div 
+                  className={`flex flex-col justify-between border p-4 rounded-sm transition-all ${
+                    llmSettings?.provider === "pollinations" 
+                      ? "border-[var(--primary)] bg-[var(--primary)]/5 shadow-[4px_4px_0px_0px_var(--primary)]" 
+                      : "border-[var(--border)] shadow-[4px_4px_0px_0px_var(--background)]"
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-mono text-xs font-bold uppercase tracking-tight">Pollinations AI</h3>
+                      {llmSettings?.provider === "pollinations" && <StatusChip variant="success" label="Active" />}
+                    </div>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      GPT-OSS 20B via Pollinations. Free, no API key required.
+                    </p>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--text-muted)]">
+                      ~5-15s per call
+                    </p>
+                  </div>
+
+                  {llmSettings?.provider !== "pollinations" && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-4 w-full rounded-sm border-[var(--border)] font-mono uppercase tracking-tighter"
+                      onClick={() => handleToggleProvider("pollinations")}
+                      disabled={isToggling}
+                    >
+                      {isToggling ? "Switching..." : "Switch"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* System info */}
         <section>
           <h2 className="mb-4 text-sm font-medium text-[var(--text-primary)]">System</h2>
@@ -133,7 +239,9 @@ export default function SettingsPage() {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[var(--text-muted)]">LLM Provider</span>
-              <span className="font-mono text-[var(--text-secondary)]">Stub (keyword classifier)</span>
+              <span className="font-mono text-[var(--text-secondary)]">
+                {llmSettings?.provider === "pollinations" ? "Pollinations AI" : "Stub (Deterministic)"}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[var(--text-muted)]">Version</span>
