@@ -24,7 +24,15 @@ const MOCK_EVENTS = [
   { id: 10, date: new Date(2026, 1, 14), content: "Valentine's Couple Sets", channel: "TikTok", status: "published", type: "Video" },
 ];
 
-const CONTENT_PACKS = [
+interface ContentPack {
+  title: string;
+  items: number;
+  status: string;
+  description: string;
+  isReal?: boolean;
+}
+
+const CONTENT_PACKS: ContentPack[] = [
   { title: "March New Arrivals Pack", items: 12, status: "ready", description: "Social assets for Spring collection launch across all channels" },
   { title: "Ramadan Campaign 2026", items: 8, status: "in_progress", description: "Modest streetwear bundles and story templates for Ramadan" },
   { title: "Collaboration Drop: Local Artists", items: 5, status: "draft", description: "Limited edition graphic tee launch content for all channels" },
@@ -63,7 +71,7 @@ export default function MarketingPage() {
     },
   });
 
-  const realContentPacks = (runs || [])
+  const realContentPacks: ContentPack[] = (runs || [])
     .filter((run) => run.templateId === "tpl-marketing-weekly" && run.status === "completed")
     .map((run) => {
       const aiNode = run.nodeRuns.find((nr) => nr.nodeType === "ai" || nr.nodeId.includes("ai"));
