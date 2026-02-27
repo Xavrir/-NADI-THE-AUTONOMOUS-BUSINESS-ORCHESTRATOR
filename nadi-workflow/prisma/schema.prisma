@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  sku          String   @unique
+  name         String
+  cogs         Int
+  price        Int
+  reorderPoint Int      @default(10)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  inventory         Inventory?
+  unitEconSnapshots UnitEconomicsSnapshot[]
+}
+
+model Inventory {
+  id        String   @id @default(cuid())
+  sku       String   @unique
+  available Int
+  reserved  Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [sku], references: [sku])
+}
+
+model TransactionRaw {
+  id          String   @id @default(cuid())
+  date        DateTime
+  description String
+  debit       Int      @default(0)
+  credit      Int      @default(0)
+  reference   String?
+  source      String   @default("csv")
+  importBatch String?
+  createdAt   DateTime @default(now())
+
+  ledgerEntry LedgerEntry?
+}
+
+model LedgerEntry {
+  id             String   @id @default(cuid())
+  transactionId  String   @unique
+  category       String
+  confidence     Float
+  evidenceId     String
+  status         String   @default("posted")
+  aiRationale    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  transaction TransactionRaw @relation(fields: [transactionId], references: [id])
+}
+
+model UnitEconomicsSnapshot {
+  id           String   @id @default(cuid())
+  sku          String
+  channel      String   @default("shopify")
+  price        Int
+  cogs         Int
+  feePct       Float
+  netMarginPct Float
+  status       String   @default("healthy")
+  createdAt    DateTime @default(now())
+
+  product Product @relation(fields: [sku], references: [sku])
+
+  @@index([sku, channel])
+}
+
+model Policy {
+  id                    String   @id @default(cuid())
+  version               Int      @default(1)
+  confidenceThreshold   Float    @default(0.90)
+  minMarginPct          Float    @default(0.20)
+  maxDiscountPct        Float    @default(0.15)
+  highValueThreshold    Int      @default(2000000)
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+}
+
+model Approval {
+  id            String   @id @default(cuid())
+  actionType    String
+  targetType    String
+  targetId      String?
+  riskLevel     String   @default("medium")
+  status        String   @default("pending")
+  confidence    Float?
+  title         String
+  description   String?
+  beforeJson    String?
+  afterJson     String?
+  evidenceJson  String?
+  resolvedBy    String?
+  resolvedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+  @@index([actionType])
+}
+
+model ReviewItem {
+  id             String   @id @default(cuid())
+  sourceType     String
+  sourceId       String?
+  suggestedJson  String
+  confidence     Float
+  userFixJson    String?
+  status         String   @default("pending")
+  resolvedBy     String?
+  resolvedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([status])
+}
+
+model Task {
+  id         String    @id @default(cuid())
+  title      String
+  status     String    @default("open")
+  priority   String    @default("medium")
+  dueDate    DateTime?
+  sourceType String?
+  sourceId   String?
+  sourceJson String?
+  assignee   String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([status])
+}
+
+model WorkflowTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  version     Int      @default(1)
+  configJson  String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  runs WorkflowRun[]
+}
+
+model WorkflowRun {
+  id          String    @id @default(cuid())
+  templateId  String
+  triggerType String
+  status      String    @default("queued")
+  summaryJson String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  template WorkflowTemplate @relation(fields: [templateId], references: [id])
+  nodeRuns NodeRun[]
+
+  @@index([status])
+  @@index([templateId])
+}
+
+model NodeRun {
+  id          String    @id @default(cuid())
+  runId       String
+  nodeId      String
+  nodeType    String
+  status      String    @default("pending")
+  inputJson   String?
+  outputJson  String?
+  evidenceJson String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  run WorkflowRun @relation(fields: [runId], references: [id])
+
+  @@index([runId])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  eventType    String
+  actor        String   @default("system")
+  targetType   String?
+  targetId     String?
+  summary      String
+  beforeJson   String?
+  afterJson    String?
+  evidenceJson String?
+  policyJson   String?
+  runId        String?
+  approvalId   String?
+  createdAt    DateTime @default(now())
+
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+model ConnectorConfig {
+  id         String   @id @default(cuid())
+  type       String   @unique
+  name       String
+  status     String   @default("inactive")
+  configJson String?
+  lastSyncAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

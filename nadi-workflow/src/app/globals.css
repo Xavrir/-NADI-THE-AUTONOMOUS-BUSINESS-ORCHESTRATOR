@@ -1,0 +1,196 @@
+@import "tailwindcss";
+
+/* ============================================================
+   NADI Workflow — Utility Forge Design System
+   Dark premium + warm orange + industrial mono evidence IDs
+   ============================================================ */
+
+:root {
+  /* Core palette */
+  --background: #0F0A07;
+  --surface: #16120F;
+  --card: #20160F;
+  --border: #2A1C12;
+  --primary: #F9802C;
+  --primary-hover: #EF7B2A;
+  --primary-muted: #81461C;
+  --text-primary: #F5F3F2;
+  --text-secondary: #C4C2C0;
+  --text-muted: #92948D;
+
+  /* Semantic status */
+  --success: #22C55E;
+  --success-muted: #166534;
+  --warning: #FFD000;
+  --warning-muted: #854D0E;
+  --danger: #EF4444;
+  --danger-muted: #7F1D1D;
+  --info: #3B82F6;
+  --info-muted: #1E3A5F;
+
+  /* Confidence gate states */
+  --gate-pass: var(--success);
+  --gate-review: var(--warning);
+  --gate-fail: var(--danger);
+
+  /* shadcn/ui compatible tokens */
+  --foreground: var(--text-primary);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface);
+  --popover-foreground: var(--text-primary);
+  --primary-foreground: #0F0A07;
+  --secondary: var(--surface);
+  --secondary-foreground: var(--text-primary);
+  --muted: #1A1410;
+  --muted-foreground: var(--text-muted);
+  --accent: var(--card);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--danger);
+  --destructive-foreground: #FAFAFA;
+  --input: var(--border);
+  --ring: var(--primary);
+  --radius: 0.5rem;
+
+  /* Sidebar */
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--text-secondary);
+  --sidebar-active: var(--primary);
+  --sidebar-active-foreground: var(--text-primary);
+  --sidebar-border: var(--border);
+
+  /* Typography */
+  --font-display: var(--font-bricolage);
+  --font-body: var(--font-ibm-plex-sans);
+  --font-mono: var(--font-ibm-plex-mono);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-muted: var(--primary-muted);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card-foreground: var(--card-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-muted: var(--success-muted);
+  --color-warning: var(--warning);
+  --color-warning-muted: var(--warning-muted);
+  --color-danger: var(--danger);
+  --color-danger-muted: var(--danger-muted);
+  --color-info: var(--info);
+  --color-info-muted: var(--info-muted);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-foreground: var(--sidebar-active-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius));
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
+}
+
+/* Base resets */
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography utility classes */
+.font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
+.font-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+/* Tabular numbers for tables and finance views */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+table {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dense mode for tables */
+.dense-table td,
+.dense-table th {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+}
+
+/* Evidence ID styling */
+.evidence-id {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  padding: 0.125rem 0.5rem;
+  border-radius: 2px;
+}
+
+/* Industrial grid rhythm */
+.grid-industrial {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-muted);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
