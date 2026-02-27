@@ -1,5 +1,6 @@
 import { StateGraph, START, END } from "@langchain/langgraph";
 import { WorkflowStateAnnotation } from "./state";
+import type { WorkflowState } from "./state";
 import { getExecutor } from "./nodes";
 import { getCheckpointer } from "./checkpointer";
 
@@ -18,21 +19,27 @@ interface EdgeConfig {
 }
 
 export function buildGraph(nodes: NodeConfig[], edges: EdgeConfig[]) {
-  const graph = new StateGraph(WorkflowStateAnnotation);
-
-  // Add all nodes
-  for (const node of nodes) {
-    graph.addNode(node.id, getExecutor(node));
+  if (nodes.length === 0) {
+    throw new Error("Graph must have at least one node");
   }
 
-  // Connect START to first node (entry node = first in array or zero in-degree)
+  // Calling addNode with string key expands N from "__start__" to string,
+  // enabling addEdge to accept arbitrary string node names.
+  const firstNode = nodes[0];
+  let g = new StateGraph(WorkflowStateAnnotation).addNode(
+    firstNode.id,
+    getExecutor(firstNode)
+  );
+
+  for (const node of nodes.slice(1)) {
+    g = g.addNode(node.id, getExecutor(node));
+  }
+
+  // Determine entry node (first node with no incoming edges)
   const hasIncoming = new Set(edges.map((e) => e.target));
   const entryNodes = nodes.filter((n) => !hasIncoming.has(n.id));
-  const firstNode = entryNodes[0] ?? nodes[0];
-
-  if (firstNode) {
-    graph.addEdge(START, firstNode.id);
-  }
+  const entryNode = entryNodes[0] ?? nodes[0];
+  g = g.addEdge(START, entryNode.id);
 
   // Group edges by source to detect conditional routing
   const edgesBySource = new Map<string, EdgeConfig[]>();
@@ -44,36 +51,30 @@ export function buildGraph(nodes: NodeConfig[], edges: EdgeConfig[]) {
   }
 
   for (const [source, outEdges] of edgesBySource) {
-    const hasLabels = outEdges.some((e) => e.label || e.when);
+    const hasLabels = outEdges.some((e) => e.label ?? e.when);
 
     if (outEdges.length > 1 && hasLabels) {
-      // Conditional routing — branch based on branchPath
+      // Conditional routing — branch based on branchPath in state
       const routeMap: Record<string, string> = {};
       for (const e of outEdges) {
         const key = e.label ?? e.when ?? e.target;
         routeMap[key] = e.target;
       }
 
-      graph.addConditionalEdges(
+      g = g.addConditionalEdges(
         source,
-        (state) => {
+        (state: WorkflowState) => {
           const path = state.branchPath;
           if (path && path in routeMap) {
             return path;
           }
-          // Fallback to first edge's key
           return Object.keys(routeMap)[0];
         },
         routeMap
       );
-    } else if (outEdges.length === 1) {
-      graph.addEdge(source, outEdges[0].target);
-    } else if (outEdges.length > 1) {
-      // Multiple edges without labels — follow all (use first as sequential chain)
-      // LangGraph doesn't support fan-out to multiple targets from addEdge in sequence
-      // so treat as sequential: add edges to all targets
+    } else {
       for (const e of outEdges) {
-        graph.addEdge(source, e.target);
+        g = g.addEdge(e.source, e.target);
       }
     }
   }
@@ -82,9 +83,9 @@ export function buildGraph(nodes: NodeConfig[], edges: EdgeConfig[]) {
   const hasOutgoing = new Set(edges.map((e) => e.source));
   for (const node of nodes) {
     if (!hasOutgoing.has(node.id)) {
-      graph.addEdge(node.id, END);
+      g = g.addEdge(node.id, END);
     }
   }
 
-  return graph.compile({ checkpointer: getCheckpointer() });
+  return g.compile({ checkpointer: getCheckpointer() });
 }
