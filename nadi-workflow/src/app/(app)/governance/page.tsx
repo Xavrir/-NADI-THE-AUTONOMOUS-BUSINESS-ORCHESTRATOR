@@ -209,7 +209,7 @@ export default function GovernancePage() {
         <TabsContent value="roles">
           <div className="space-y-4">
             <p className="text-sm text-[var(--text-muted)]">
-              Role-based access matrix for Kopi Nadi workspace. Roles are system-defined in the MVP.
+              Role-based access matrix for NADI Streetwear workspace. Roles are system-defined in the MVP.
             </p>
 
             <div className="overflow-auto card-elevated">

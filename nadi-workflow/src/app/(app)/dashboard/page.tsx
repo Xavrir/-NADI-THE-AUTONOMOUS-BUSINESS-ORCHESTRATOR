@@ -90,7 +90,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div>
-        <PageHeader title="Dashboard" subtitle="Kopi Nadi operational overview" />
+        <PageHeader title="Dashboard" subtitle="NADI Streetwear operational overview" />
         <div className="grid gap-4 md:grid-cols-4">
           {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}
         </div>
@@ -107,7 +107,7 @@ export default function DashboardPage() {
     <div>
       <PageHeader
         title="Dashboard"
-        subtitle="Kopi Nadi operational overview"
+        subtitle="NADI Streetwear operational overview"
         actions={
           <Button
             variant={showDemo ? "outline" : "default"}

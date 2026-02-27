@@ -24,10 +24,9 @@ const PROMPT_TEMPLATES: Record<string, { version: string; system: string; user: 
   classify_ledger_row: {
     version: "v1.0",
     system: [
-      "You classify financial transactions for an Indonesian MSME coffee business called Kopi Nadi.",
-      "Categories: COGS - Raw Materials, Revenue - Online Sales, Revenue - Platform Settlement,",
-      "Revenue - Walk-in, Operating Expense - Utilities, Operating Expense - Rent,",
-      "Operating Expense - Wages, Operating Expense - Marketing, Other Expense, Other Revenue.",
+      "You classify financial transactions for an Indonesian streetwear dropship business called NADI Streetwear.",
+      "Categories: COGS - Raw Materials, COGS - Production Services, COGS - Packaging, Revenue - Online Sales, Revenue - Platform Settlement,",
+      "Operating Expense - Shipping, Operating Expense - Marketing, Operating Expense - Warehouse, Other Expense, Other Revenue.",
       "Return ONLY valid JSON with no markdown wrapping. Schema:",
       '{"category": string, "confidence": number (0-1), "rationale": string}',
     ].join(" "),
@@ -41,21 +40,21 @@ const PROMPT_TEMPLATES: Record<string, { version: string; system: string; user: 
   draft_content_strategy: {
     version: "v1.0",
     system: [
-      "You are a marketing strategist for Kopi Nadi, an Indonesian coffee MSME.",
-      "Draft concise social media content strategies.",
+      "You are a marketing strategist for NADI Streetwear, an Indonesian fashion dropship brand.",
+      "Draft streetwear brand content strategies for Gen Z audience.",
       "Return ONLY valid JSON with no markdown. Schema:",
       '{"strategy": string, "platforms": string[], "confidence": number (0-1), "rationale": string}',
     ].join(" "),
     user: (ctx) =>
       `Create a content strategy for: ${ctx.topic ?? "weekly promotion"}. ` +
-      `Available products: ${ctx.products ?? "coffee, latte, matcha"}. ` +
+      `Available products: ${ctx.products ?? "oversized tees, cargo joggers, hoodies, caps, sling bags"}. ` +
       `Return JSON: {"strategy": string, "platforms": string[], "confidence": number, "rationale": string}`,
   },
 
   classify_order_action: {
     version: "v1.0",
     system: [
-      "You are an order routing AI for Kopi Nadi, an Indonesian coffee MSME.",
+      "You are an order routing AI for NADI Streetwear, an Indonesian fashion dropship brand.",
       "Decide whether an incoming order should be fulfilled immediately or held for review.",
       "Consider: stock availability, order size, delivery address clarity, payment status.",
       "Return ONLY valid JSON with no markdown. Schema:",
@@ -63,7 +62,7 @@ const PROMPT_TEMPLATES: Record<string, { version: string; system: string; user: 
     ].join(" "),
     user: (ctx) =>
       `Route this order: ${ctx.orderId ?? "unknown"}, ` +
-      `items: ${ctx.items ?? "assorted coffee products"}, ` +
+      `items: ${ctx.items ?? "assorted streetwear products"}, ` +
       `stock status: ${ctx.stockStatus ?? "available"}, ` +
       `channel: ${ctx.channel ?? "shopify"}.` +
       ` Return JSON: {"action": "fulfill" or "hold", "confidence": number 0-1, "rationale": string}`,
@@ -72,7 +71,7 @@ const PROMPT_TEMPLATES: Record<string, { version: string; system: string; user: 
   classify_general: {
     version: "v1.0",
     system: [
-      "You are an AI decision node in NADI Workflow, an autonomous business orchestrator.",
+      "You are an AI decision node in NADI Workflow, an autonomous business orchestrator for NADI Streetwear.",
       "Analyze the input and return a structured classification.",
       "Return ONLY valid JSON with no markdown. Schema:",
       '{"classification": string, "confidence": number (0-1), "rationale": string}',

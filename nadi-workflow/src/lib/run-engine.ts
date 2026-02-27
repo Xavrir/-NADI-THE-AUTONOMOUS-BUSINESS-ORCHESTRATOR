@@ -116,23 +116,23 @@ function deterministicIndex(runId: string, arrayLength: number): number {
 }
 
 const SAMPLE_TRANSACTIONS = [
-  { description: "Pembelian biji kopi Arabica Gayo 50kg", debit: 4250000, credit: 0, reference: "PO-2026-0142" },
-  { description: "Penjualan latte oat milk x12 via Grab", debit: 0, credit: 540000, reference: "GRB-26022701" },
-  { description: "Bayar listrik toko Februari", debit: 875000, credit: 0, reference: "PLN-FEB-2026" },
-  { description: "Revenue Shopify order #SH-4421 espresso beans 1kg x5", debit: 0, credit: 1125000, reference: "SH-4421" },
-  { description: "Gaji part-time barista Minggu ke-4", debit: 1200000, credit: 0, reference: "HR-W4-FEB26" },
+  { description: "Pembelian kain cotton combed 30s dari supplier Bandung", debit: 3200000, credit: 0, reference: "PO-2026-0142" },
+  { description: "Penjualan Shopify Oversized Tee x5 + Snapback x3", debit: 0, credit: 1332000, reference: "SHP-2026-0227" },
+  { description: "Bayar jasa sablon DTG 200 pcs", debit: 1400000, credit: 0, reference: "SUP-DTG-0127" },
+  { description: "Revenue TikTok Shop settlement Cargo Jogger x8", debit: 0, credit: 2792000, reference: "TTS-STL-0227" },
+  { description: "Beli packaging box custom branded 500 pcs", debit: 750000, credit: 0, reference: "SUP-PKG-0226" },
 ];
 
 const SAMPLE_MARKETING_SIGNALS = [
-  { topic: "Promo Valentine latte couple bundle", products: "Hot Latte, Matcha Latte", overstock: "MATCHA-LATTE" },
-  { topic: "Weekend flash sale iced drinks", products: "Iced Americano, Kopi Susu 250ml", overstock: null },
-  { topic: "Ramadan pre-dawn coffee promo", products: "Kopi Susu 250ml, Hot Latte, Gula Aren 1L", overstock: "GULA-AREN-1L" },
+  { topic: "New drop: Jakarta Skyline Tee launch campaign", products: "Graphic Tee Jakarta Skyline, Oversized Tee Shadow Black", overstock: null },
+  { topic: "Flash sale weekend: Cargo Jogger + Track Shorts bundle", products: "Cargo Jogger Stone Grey, Track Shorts Midnight Navy", overstock: "NADI-SHORT-NVY" },
+  { topic: "Ramadan modest streetwear collection promo", products: "Hoodie Washed Olive, Cargo Jogger Stone Grey, Sling Bag Tactical Black", overstock: null },
 ];
 
 const SAMPLE_ORDERS = [
-  { orderId: "ORD-SH-4501", items: "Kopi Susu 250ml x3, Iced Americano x2", channel: "shopify", stockStatus: "available", total: 98000 },
-  { orderId: "ORD-GF-1102", items: "Matcha Latte x1, Hot Latte x1", channel: "gofood", stockStatus: "available", total: 53000 },
-  { orderId: "ORD-GRB-880", items: "Gula Aren 1L x5", channel: "grabfood", stockStatus: "low (3 units)", total: 275000 },
+  { orderId: "ORD-SH-4501", items: "Oversized Tee Shadow Black x2, Snapback Cap x1", channel: "shopify", stockStatus: "available", total: 507000 },
+  { orderId: "ORD-TKP-3302", items: "Cargo Jogger Stone Grey x1, Track Shorts x1", channel: "tokopedia", stockStatus: "available", total: 568000 },
+  { orderId: "ORD-TTS-2201", items: "Sling Bag Tactical Black x4", channel: "tiktok_shop", stockStatus: "low (3 units)", total: 1116000 },
 ];
 
 // ─── Node Executors ───────────────────────────────────────────────

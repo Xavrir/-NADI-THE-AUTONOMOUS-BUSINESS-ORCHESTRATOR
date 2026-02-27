@@ -9,34 +9,41 @@ function eid(suffix: string) {
 async function main() {
   await prisma.product.createMany({
     data: [
-      { sku: "KOPI-SUSU-250", name: "Kopi Susu 250ml", cogs: 8500, price: 18000, reorderPoint: 15 },
-      { sku: "GULA-AREN-1L", name: "Gula Aren 1L", cogs: 32000, price: 55000, reorderPoint: 10 },
-      { sku: "AMERICANO-ICED", name: "Iced Americano", cogs: 6000, price: 22000, reorderPoint: 20 },
-      { sku: "LATTE-HOT", name: "Hot Latte", cogs: 9000, price: 25000, reorderPoint: 12 },
-      { sku: "MATCHA-LATTE", name: "Matcha Latte", cogs: 12000, price: 28000, reorderPoint: 8 },
+      { sku: "NADI-TEE-BLK-OS", name: "Oversized Tee - Shadow Black", cogs: 65000, price: 189000, reorderPoint: 20 },
+      { sku: "NADI-CARGO-GRY", name: "Cargo Jogger - Stone Grey", cogs: 120000, price: 349000, reorderPoint: 10 },
+      { sku: "NADI-HOOD-OLV", name: "Hoodie - Washed Olive", cogs: 155000, price: 459000, reorderPoint: 8 },
+      { sku: "NADI-CAP-CRMBLK", name: "Snapback Cap - Cream/Black", cogs: 35000, price: 129000, reorderPoint: 25 },
+      { sku: "NADI-SLING-BLK", name: "Sling Bag - Tactical Black", cogs: 85000, price: 279000, reorderPoint: 12 },
+      { sku: "NADI-TEE-JKT", name: "Graphic Tee - Jakarta Skyline", cogs: 55000, price: 159000, reorderPoint: 20 },
+      { sku: "NADI-SHORT-NVY", name: "Track Shorts - Midnight Navy", cogs: 70000, price: 219000, reorderPoint: 15 },
     ],
   });
 
   await prisma.inventory.createMany({
     data: [
-      { sku: "KOPI-SUSU-250", available: 45 },
-      { sku: "GULA-AREN-1L", available: 3 },
-      { sku: "AMERICANO-ICED", available: 30 },
-      { sku: "LATTE-HOT", available: 20 },
-      { sku: "MATCHA-LATTE", available: 15 },
+      { sku: "NADI-TEE-BLK-OS", available: 45 },
+      { sku: "NADI-CARGO-GRY", available: 22 },
+      { sku: "NADI-HOOD-OLV", available: 18 },
+      { sku: "NADI-CAP-CRMBLK", available: 60 },
+      { sku: "NADI-SLING-BLK", available: 3 },
+      { sku: "NADI-TEE-JKT", available: 35 },
+      { sku: "NADI-SHORT-NVY", available: 28 },
     ],
   });
 
   await prisma.unitEconomicsSnapshot.createMany({
     data: [
-      { sku: "KOPI-SUSU-250", channel: "shopify", price: 18000, cogs: 8500, feePct: 0.05, netMarginPct: 0.478, status: "healthy" },
-      { sku: "KOPI-SUSU-250", channel: "gofood", price: 18000, cogs: 8500, feePct: 0.25, netMarginPct: 0.278, status: "warning" },
-      { sku: "GULA-AREN-1L", channel: "shopify", price: 55000, cogs: 32000, feePct: 0.05, netMarginPct: 0.368, status: "healthy" },
-      { sku: "AMERICANO-ICED", channel: "shopify", price: 22000, cogs: 6000, feePct: 0.05, netMarginPct: 0.677, status: "healthy" },
-      { sku: "AMERICANO-ICED", channel: "grabfood", price: 22000, cogs: 6000, feePct: 0.30, netMarginPct: 0.427, status: "warning" },
-      { sku: "LATTE-HOT", channel: "shopify", price: 25000, cogs: 9000, feePct: 0.05, netMarginPct: 0.590, status: "healthy" },
-      { sku: "MATCHA-LATTE", channel: "gofood", price: 28000, cogs: 12000, feePct: 0.25, netMarginPct: 0.321, status: "warning" },
-      { sku: "MATCHA-LATTE", channel: "shopify", price: 28000, cogs: 12000, feePct: 0.05, netMarginPct: 0.521, status: "healthy" },
+      { sku: "NADI-TEE-BLK-OS", channel: "shopify", price: 189000, cogs: 65000, feePct: 0.05, netMarginPct: 0.606, status: "healthy" },
+      { sku: "NADI-TEE-BLK-OS", channel: "tokopedia", price: 189000, cogs: 65000, feePct: 0.12, netMarginPct: 0.536, status: "healthy" },
+      { sku: "NADI-CARGO-GRY", channel: "shopify", price: 349000, cogs: 120000, feePct: 0.05, netMarginPct: 0.608, status: "healthy" },
+      { sku: "NADI-CARGO-GRY", channel: "tiktok_shop", price: 349000, cogs: 120000, feePct: 0.18, netMarginPct: 0.476, status: "warning" },
+      { sku: "NADI-HOOD-OLV", channel: "shopify", price: 459000, cogs: 155000, feePct: 0.05, netMarginPct: 0.612, status: "healthy" },
+      { sku: "NADI-CAP-CRMBLK", channel: "shopify", price: 129000, cogs: 35000, feePct: 0.05, netMarginPct: 0.679, status: "healthy" },
+      { sku: "NADI-CAP-CRMBLK", channel: "tokopedia", price: 129000, cogs: 35000, feePct: 0.12, netMarginPct: 0.609, status: "healthy" },
+      { sku: "NADI-SLING-BLK", channel: "tiktok_shop", price: 279000, cogs: 85000, feePct: 0.18, netMarginPct: 0.515, status: "warning" },
+      { sku: "NADI-TEE-JKT", channel: "shopify", price: 159000, cogs: 55000, feePct: 0.05, netMarginPct: 0.604, status: "healthy" },
+      { sku: "NADI-SHORT-NVY", channel: "shopify", price: 219000, cogs: 70000, feePct: 0.05, netMarginPct: 0.630, status: "healthy" },
+      { sku: "NADI-SHORT-NVY", channel: "tiktok_shop", price: 219000, cogs: 70000, feePct: 0.18, netMarginPct: 0.500, status: "warning" },
     ],
   });
 
@@ -57,23 +64,23 @@ async function main() {
 
   await prisma.transactionRaw.createMany({
     data: [
-      { id: "txn-001", date: twoDaysAgo, description: "Pembelian biji kopi arabika 10kg", debit: 850000, credit: 0, reference: "INV-2026-0041", source: "csv", importBatch: "batch-001" },
-      { id: "txn-002", date: twoDaysAgo, description: "Penjualan Shopify #1042", debit: 0, credit: 396000, reference: "SHP-1042", source: "csv", importBatch: "batch-001" },
-      { id: "txn-003", date: yesterday, description: "Bayar listrik toko Jan 2026", debit: 450000, credit: 0, reference: "PLN-01-2026", source: "csv", importBatch: "batch-001" },
-      { id: "txn-004", date: yesterday, description: "Transfer dari GoFood settlement", debit: 0, credit: 1250000, reference: "GF-STL-0127", source: "csv", importBatch: "batch-001" },
-      { id: "txn-005", date: now, description: "Beli gula aren 5L dari supplier", debit: 160000, credit: 0, reference: "SUP-GA-005", source: "csv", importBatch: "batch-002" },
-      { id: "txn-006", date: now, description: "Penjualan walk-in customer", debit: 0, credit: 75000, reference: "WALK-0127-01", source: "manual" },
+      { id: "txn-001", date: twoDaysAgo, description: "Pembelian kain cotton combed 30s 100m", debit: 3200000, credit: 0, reference: "INV-2026-0041", source: "csv", importBatch: "batch-001" },
+      { id: "txn-002", date: twoDaysAgo, description: "Penjualan Shopify #1042 Oversized Tee x3 + Cap x2", debit: 0, credit: 825000, reference: "SHP-1042", source: "csv", importBatch: "batch-001" },
+      { id: "txn-003", date: yesterday, description: "Bayar jasa sablon DTG 200 pcs", debit: 1400000, credit: 0, reference: "SUP-DTG-0127", source: "csv", importBatch: "batch-001" },
+      { id: "txn-004", date: yesterday, description: "Transfer dari Tokopedia settlement", debit: 0, credit: 2850000, reference: "TKP-STL-0127", source: "csv", importBatch: "batch-001" },
+      { id: "txn-005", date: now, description: "Beli packaging box custom 500 pcs", debit: 750000, credit: 0, reference: "SUP-PKG-005", source: "csv", importBatch: "batch-002" },
+      { id: "txn-006", date: now, description: "Penjualan TikTok Shop Hoodie x2", debit: 0, credit: 918000, reference: "TTS-0227-01", source: "manual" },
     ],
   });
 
   await prisma.ledgerEntry.createMany({
     data: [
-      { transactionId: "txn-001", category: "COGS - Raw Materials", confidence: 0.96, evidenceId: eid("000001"), status: "posted", aiRationale: "Keyword 'biji kopi' matches raw material procurement pattern" },
-      { transactionId: "txn-002", category: "Revenue - Online Sales", confidence: 0.98, evidenceId: eid("000002"), status: "posted", aiRationale: "Shopify order reference detected" },
-      { transactionId: "txn-003", category: "Operating Expense - Utilities", confidence: 0.94, evidenceId: eid("000003"), status: "posted", aiRationale: "PLN reference matches electricity utility pattern" },
-      { transactionId: "txn-004", category: "Revenue - Platform Settlement", confidence: 0.92, evidenceId: eid("000004"), status: "posted", aiRationale: "GoFood settlement transfer pattern" },
-      { transactionId: "txn-005", category: "COGS - Raw Materials", confidence: 0.72, evidenceId: eid("000005"), status: "review", aiRationale: "Gula aren could be raw material or packaging — low confidence" },
-      { transactionId: "txn-006", category: "Revenue - Walk-in", confidence: 0.65, evidenceId: eid("000006"), status: "review", aiRationale: "Walk-in sales without structured reference — needs review" },
+      { transactionId: "txn-001", category: "COGS - Raw Materials", confidence: 0.96, evidenceId: eid("000001"), status: "posted", aiRationale: "Keyword 'kain cotton' matches raw material procurement for garment production" },
+      { transactionId: "txn-002", category: "Revenue - Online Sales", confidence: 0.98, evidenceId: eid("000002"), status: "posted", aiRationale: "Shopify order reference detected — multi-item sale" },
+      { transactionId: "txn-003", category: "COGS - Production Services", confidence: 0.94, evidenceId: eid("000003"), status: "posted", aiRationale: "DTG printing service matches production cost pattern" },
+      { transactionId: "txn-004", category: "Revenue - Platform Settlement", confidence: 0.92, evidenceId: eid("000004"), status: "posted", aiRationale: "Tokopedia settlement transfer pattern" },
+      { transactionId: "txn-005", category: "COGS - Packaging", confidence: 0.68, evidenceId: eid("000005"), status: "review", aiRationale: "Custom packaging could be COGS or marketing expense — low confidence" },
+      { transactionId: "txn-006", category: "Revenue - Online Sales", confidence: 0.62, evidenceId: eid("000006"), status: "review", aiRationale: "TikTok Shop sale without structured reference — needs review" },
     ],
   });
 
@@ -83,42 +90,42 @@ async function main() {
         id: "apr-001",
         actionType: "price_change",
         targetType: "product",
-        targetId: "KOPI-SUSU-250",
+        targetId: "NADI-CARGO-GRY",
         riskLevel: "medium",
         status: "pending",
         confidence: 0.88,
-        title: "Price increase: Kopi Susu 250ml on GoFood",
-        description: "Margin below threshold on GoFood channel. Recommended price increase from Rp 18,000 to Rp 21,000.",
-        beforeJson: JSON.stringify({ price: 18000, channel: "gofood", netMarginPct: 0.278 }),
-        afterJson: JSON.stringify({ price: 21000, channel: "gofood", netMarginPct: 0.445 }),
+        title: "Price increase: Cargo Jogger on TikTok Shop",
+        description: "Margin below threshold on TikTok Shop channel (18% fee). Recommended price increase from Rp 349,000 to Rp 399,000.",
+        beforeJson: JSON.stringify({ price: 349000, channel: "tiktok_shop", netMarginPct: 0.476 }),
+        afterJson: JSON.stringify({ price: 399000, channel: "tiktok_shop", netMarginPct: 0.571 }),
         evidenceJson: JSON.stringify({ evidenceId: eid("000010"), pipeline: "P2", runId: "RUN-P2-001" }),
       },
       {
         id: "apr-002",
         actionType: "restock",
         targetType: "inventory",
-        targetId: "GULA-AREN-1L",
+        targetId: "NADI-SLING-BLK",
         riskLevel: "high",
         status: "pending",
         confidence: 1.0,
-        title: "Emergency restock: Gula Aren 1L",
-        description: "Stock at 3 units, below reorder point of 10. Restock order for 20 units recommended.",
-        beforeJson: JSON.stringify({ available: 3, reorderPoint: 10 }),
-        afterJson: JSON.stringify({ orderQty: 20, estimatedCost: 640000 }),
+        title: "Emergency restock: Sling Bag - Tactical Black",
+        description: "Stock at 3 units, below reorder point of 12. Restock order for 30 units recommended.",
+        beforeJson: JSON.stringify({ available: 3, reorderPoint: 12 }),
+        afterJson: JSON.stringify({ orderQty: 30, estimatedCost: 2550000 }),
         evidenceJson: JSON.stringify({ evidenceId: eid("000011"), pipeline: "P5", runId: "RUN-P5-001" }),
       },
       {
         id: "apr-003",
         actionType: "promo_stop",
         targetType: "campaign",
-        targetId: "PROMO-MATCHA-FEB",
+        targetId: "PROMO-HOODIE-FEB",
         riskLevel: "low",
         status: "approved",
         confidence: 0.95,
-        title: "Stop promo: Matcha Latte GoFood 20% off",
-        description: "Promo causing margin to drop below minimum policy threshold.",
-        beforeJson: JSON.stringify({ discount: 0.20, netMarginPct: 0.121 }),
-        afterJson: JSON.stringify({ discount: 0, netMarginPct: 0.321 }),
+        title: "Stop promo: Hoodie Washed Olive TikTok 25% off",
+        description: "Promo causing margin to drop below minimum policy threshold on TikTok Shop.",
+        beforeJson: JSON.stringify({ discount: 0.25, netMarginPct: 0.087 }),
+        afterJson: JSON.stringify({ discount: 0, netMarginPct: 0.612 }),
         evidenceJson: JSON.stringify({ evidenceId: eid("000012"), pipeline: "P2" }),
         resolvedBy: "owner",
         resolvedAt: yesterday,
@@ -132,23 +139,23 @@ async function main() {
         id: "rev-001",
         sourceType: "ledger",
         sourceId: "txn-005",
-        suggestedJson: JSON.stringify({ category: "COGS - Raw Materials", confidence: 0.72 }),
-        confidence: 0.72,
+        suggestedJson: JSON.stringify({ category: "COGS - Packaging", confidence: 0.68 }),
+        confidence: 0.68,
         status: "pending",
       },
       {
         id: "rev-002",
         sourceType: "ledger",
         sourceId: "txn-006",
-        suggestedJson: JSON.stringify({ category: "Revenue - Walk-in", confidence: 0.65 }),
-        confidence: 0.65,
+        suggestedJson: JSON.stringify({ category: "Revenue - Online Sales", confidence: 0.62 }),
+        confidence: 0.62,
         status: "pending",
       },
       {
         id: "rev-003",
         sourceType: "order_classification",
-        sourceId: "ORD-GF-1099",
-        suggestedJson: JSON.stringify({ action: "fulfill", confidence: 0.78, reason: "Ambiguous address format" }),
+        sourceId: "ORD-TTS-2201",
+        suggestedJson: JSON.stringify({ action: "fulfill", confidence: 0.78, reason: "Oversized item requires special packaging" }),
         confidence: 0.78,
         status: "pending",
       },
@@ -158,9 +165,9 @@ async function main() {
   await prisma.task.createMany({
     data: [
       { id: "tsk-001", title: "Review low-confidence ledger entries from batch-002", status: "open", priority: "high", dueDate: now, sourceType: "pipeline", sourceId: "P1" },
-      { id: "tsk-002", title: "Confirm restock order for Gula Aren 1L with supplier", status: "open", priority: "high", dueDate: new Date(now.getTime() + 86400000), sourceType: "approval", sourceId: "apr-002" },
-      { id: "tsk-003", title: "Update GoFood menu pricing after approval", status: "open", priority: "medium", dueDate: new Date(now.getTime() + 172800000), sourceType: "approval", sourceId: "apr-001" },
-      { id: "tsk-004", title: "Reconcile walk-in sales receipts for January", status: "open", priority: "low", dueDate: new Date(now.getTime() + 604800000), sourceType: "manual" },
+      { id: "tsk-002", title: "Confirm restock order for Sling Bag with supplier", status: "open", priority: "high", dueDate: new Date(now.getTime() + 86400000), sourceType: "approval", sourceId: "apr-002" },
+      { id: "tsk-003", title: "Update TikTok Shop pricing after approval", status: "open", priority: "medium", dueDate: new Date(now.getTime() + 172800000), sourceType: "approval", sourceId: "apr-001" },
+      { id: "tsk-004", title: "Reconcile TikTok Shop sales receipts for February", status: "open", priority: "low", dueDate: new Date(now.getTime() + 604800000), sourceType: "manual" },
     ],
   });
 
@@ -318,25 +325,25 @@ async function main() {
   await prisma.auditLog.createMany({
     data: [
       { eventType: "csv_import", actor: "system", targetType: "batch", targetId: "batch-001", summary: "Imported 4 transactions from CSV batch-001", evidenceJson: JSON.stringify({ evidenceId: eid("000020"), batchId: "batch-001", rowCount: 4 }), runId: "run-001", createdAt: twoDaysAgo },
-      { eventType: "ledger_posted", actor: "system", targetType: "transaction", targetId: "txn-001", summary: "Posted: Pembelian biji kopi arabika — COGS Raw Materials", evidenceJson: JSON.stringify({ evidenceId: eid("000001"), confidence: 0.96 }), createdAt: twoDaysAgo },
-      { eventType: "review_created", actor: "system", targetType: "transaction", targetId: "txn-005", summary: "Low confidence (0.72) — routed to review queue", evidenceJson: JSON.stringify({ evidenceId: eid("000005"), confidence: 0.72 }), createdAt: now },
-      { eventType: "approval_created", actor: "pipeline:P2", targetType: "approval", targetId: "apr-001", summary: "Price change approval created for Kopi Susu 250ml on GoFood", evidenceJson: JSON.stringify({ evidenceId: eid("000010"), pipeline: "P2" }), createdAt: yesterday },
-      { eventType: "approval_resolved", actor: "owner", targetType: "approval", targetId: "apr-003", summary: "Approved: Stop promo Matcha Latte GoFood 20% off", beforeJson: JSON.stringify({ status: "pending" }), afterJson: JSON.stringify({ status: "approved", resolvedBy: "owner" }), evidenceJson: JSON.stringify({ evidenceId: eid("000012") }), approvalId: "apr-003", createdAt: yesterday },
-      { eventType: "inventory_alert", actor: "pipeline:P5", targetType: "inventory", targetId: "GULA-AREN-1L", summary: "Low stock alert: Gula Aren 1L at 3 units (reorder point: 10)", evidenceJson: JSON.stringify({ evidenceId: eid("000011"), available: 3, reorderPoint: 10 }), createdAt: now },
-      { eventType: "policy_check", actor: "system", targetType: "product", targetId: "KOPI-SUSU-250", summary: "Margin below threshold on GoFood: 27.8% < 20% min — PASS (above min but flagged)", policyJson: JSON.stringify({ minMarginPct: 0.20, actual: 0.278, result: "flagged" }), createdAt: yesterday },
+      { eventType: "ledger_posted", actor: "system", targetType: "transaction", targetId: "txn-001", summary: "Posted: Pembelian kain cotton combed — COGS Raw Materials", evidenceJson: JSON.stringify({ evidenceId: eid("000001"), confidence: 0.96 }), createdAt: twoDaysAgo },
+      { eventType: "review_created", actor: "system", targetType: "transaction", targetId: "txn-005", summary: "Low confidence (0.68) — routed to review queue", evidenceJson: JSON.stringify({ evidenceId: eid("000005"), confidence: 0.68 }), createdAt: now },
+      { eventType: "approval_created", actor: "pipeline:P2", targetType: "approval", targetId: "apr-001", summary: "Price change approval created for Cargo Jogger on TikTok Shop", evidenceJson: JSON.stringify({ evidenceId: eid("000010"), pipeline: "P2" }), createdAt: yesterday },
+      { eventType: "approval_resolved", actor: "owner", targetType: "approval", targetId: "apr-003", summary: "Approved: Stop promo Hoodie Washed Olive TikTok 25% off", beforeJson: JSON.stringify({ status: "pending" }), afterJson: JSON.stringify({ status: "approved", resolvedBy: "owner" }), evidenceJson: JSON.stringify({ evidenceId: eid("000012") }), approvalId: "apr-003", createdAt: yesterday },
+      { eventType: "inventory_alert", actor: "pipeline:P5", targetType: "inventory", targetId: "NADI-SLING-BLK", summary: "Low stock alert: Sling Bag - Tactical Black at 3 units (reorder point: 12)", evidenceJson: JSON.stringify({ evidenceId: eid("000011"), available: 3, reorderPoint: 12 }), createdAt: now },
+      { eventType: "policy_check", actor: "system", targetType: "product", targetId: "NADI-CARGO-GRY", summary: "Margin on TikTok Shop: 47.6% — above 20% min but flagged for high platform fee", policyJson: JSON.stringify({ minMarginPct: 0.20, actual: 0.476, result: "flagged" }), createdAt: yesterday },
     ],
   });
 
   await prisma.connectorConfig.createMany({
     data: [
-      { type: "shopify", name: "Shopify Store", status: "active", configJson: JSON.stringify({ shop: "kopinadi.myshopify.com" }) },
+      { type: "shopify", name: "NADI Shopify Store", status: "active", configJson: JSON.stringify({ shop: "cqcf6p-6g.myshopify.com" }) },
       { type: "csv_importer", name: "Bank CSV Importer", status: "active" },
-      { type: "whatsapp", name: "WhatsApp Sender", status: "inactive" },
-      { type: "social_scheduler", name: "Social Scheduler", status: "inactive" },
+      { type: "tokopedia", name: "Tokopedia Seller", status: "inactive" },
+      { type: "tiktok_shop", name: "TikTok Shop", status: "inactive" },
     ],
   });
 
-  console.log("Seed completed: Kopi Nadi workspace");
+  console.log("Seed completed: NADI Streetwear workspace");
 }
 
 main()

@@ -270,7 +270,7 @@ export default function SettingsPage() {
              </div>
              <div className="flex justify-between text-sm">
                <span className="text-[var(--text-muted)]">Workspace</span>
-               <span className="font-mono text-[var(--text-secondary)]">Kopi Nadi</span>
+               <span className="font-mono text-[var(--text-secondary)]">NADI Streetwear</span>
              </div>
            </div>
          </section>
@@ -284,7 +284,7 @@ export default function SettingsPage() {
 
           <div className="card-elevated p-5 space-y-4">
             <p className="text-sm text-[var(--text-secondary)]">
-              Reset all data to the original Kopi Nadi demo state. This will clear all workflow runs, approvals, and audit entries.
+              Reset all data to the original NADI Streetwear demo state. This will clear all workflow runs, approvals, and audit entries.
             </p>
 
             <div className="flex flex-col gap-2">
