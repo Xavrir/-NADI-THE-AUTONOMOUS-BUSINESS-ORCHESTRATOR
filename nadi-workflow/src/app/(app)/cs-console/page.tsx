@@ -8,7 +8,7 @@ const TICKETS = [
   {
     id: "CS-2026-0147",
     customer: "Andi Prasetyo",
-    subject: "Order #ORD-8841 not delivered after 5 days",
+    subject: "Order #ORD-8841 Hoodie not delivered after 5 days",
     channel: "WhatsApp",
     priority: "high",
     status: "escalated",
@@ -18,8 +18,8 @@ const TICKETS = [
   {
     id: "CS-2026-0148",
     customer: "Siti Rahayu",
-    subject: "Wrong item received — Kopi Susu instead of Matcha Latte",
-    channel: "Shopee Chat",
+    subject: "Wrong item received — Graphic Tee sent instead of Oversized Tee",
+    channel: "TikTok Shop",
     priority: "medium",
     status: "open",
     age: "1d 12h",
@@ -28,7 +28,7 @@ const TICKETS = [
   {
     id: "CS-2026-0149",
     customer: "Budi Santoso",
-    subject: "Request for bulk order pricing (50 pcs/week)",
+    subject: "Request for bulk order pricing — 50 Snapback Caps/month",
     channel: "Email",
     priority: "low",
     status: "open",
@@ -38,7 +38,7 @@ const TICKETS = [
   {
     id: "CS-2026-0150",
     customer: "Dewi Lestari",
-    subject: "Packaging damage on arrival — photo attached",
+    subject: "Packaging damage on Cargo Jogger — photo attached",
     channel: "Tokopedia",
     priority: "medium",
     status: "resolved",

@@ -50,32 +50,40 @@ async function executePriceChange(approval: { targetId: string | null; afterJson
   if (!approval.afterJson || !approval.targetId) return;
 
   const afterState = JSON.parse(approval.afterJson) as {
-    sku: string;
+    sku?: string;
     channel: string;
     price: number;
-    cogs: number;
-    feePct: number;
+    cogs?: number;
+    feePct?: number;
     netMarginPct: number;
-    status: string;
+    status?: string;
   };
 
-  // Create new economics snapshot with approved price
-  await prisma.unitEconomicsSnapshot.create({
-    data: {
-      sku: afterState.sku,
-      channel: afterState.channel,
-      price: afterState.price,
-      cogs: afterState.cogs,
-      feePct: afterState.feePct,
-      netMarginPct: afterState.netMarginPct,
-      status: afterState.status,
-    },
-  });
+  // Fallback to approval.targetId if sku is missing
+  const sku = afterState.sku ?? approval.targetId;
+  const cogs = afterState.cogs;
+  const feePct = afterState.feePct;
+  const status = afterState.status;
+
+  // Only create snapshot if all required fields are present
+  if (cogs !== undefined && feePct !== undefined && status !== undefined) {
+    await prisma.unitEconomicsSnapshot.create({
+      data: {
+        sku,
+        channel: afterState.channel,
+        price: afterState.price,
+        cogs,
+        feePct,
+        netMarginPct: afterState.netMarginPct,
+        status,
+      },
+    });
+  }
 
   // Update product price if Shopify (primary)
   if (afterState.channel === "shopify") {
     await prisma.product.update({
-      where: { sku: afterState.sku },
+      where: { sku },
       data: { price: afterState.price },
     });
   }
@@ -85,7 +93,7 @@ async function executePriceChange(approval: { targetId: string | null; afterJson
     actor: "system",
     targetType: "unit_economics",
     targetId: approval.targetId,
-    summary: `Price change applied: ${afterState.sku} (${afterState.channel}) → ${afterState.price} IDR`,
+    summary: `Price change applied: ${sku} (${afterState.channel}) → ${afterState.price} IDR`,
     afterJson: afterState,
     approvalId,
   });

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { StatusChip } from "@/components/shared/status-chip";
 import { EvidenceChip } from "@/components/shared/evidence-chip";
 import { DetailsDrawer, useDrawer } from "@/components/shared/details-drawer";
+import { formatIDR } from "@/lib/utils";
 
 interface Approval {
   id: string;
@@ -28,6 +29,70 @@ const riskVariant = (risk: string) => {
   if (risk === "medium") return "warning" as const;
   return "info" as const;
 };
+
+const LABELS: Record<string, string> = {
+  netMarginPct: "MARGIN",
+  price: "PRICE",
+  orderQty: "QTY",
+  available: "STOCK",
+  discount: "DISCOUNT",
+  estimatedCost: "COST",
+  reorderPoint: "REORDER",
+};
+
+function renderDiffChips(before: Record<string, unknown> | null, after: Record<string, unknown> | null) {
+  if (!before || !after) return null;
+
+  const allKeys = Array.from(new Set([...Object.keys(before), ...Object.keys(after)]));
+  const changedKeys = allKeys.filter((k) => {
+    const b = before[k];
+    const a = after[k];
+    if (b === a) return false;
+    if (typeof b === "object" && typeof a === "object") {
+      return JSON.stringify(b) !== JSON.stringify(a);
+    }
+    return b !== a;
+  });
+
+  if (changedKeys.length === 0) return null;
+
+  const formatValue = (key: string, val: unknown) => {
+    if (val === undefined || val === null) return "N/A";
+    if (typeof val === "number") {
+      if (key.toLowerCase().includes("price") || key.toLowerCase().includes("cost")) {
+        return formatIDR(val);
+      }
+      if (key.toLowerCase().includes("pct") || key.toLowerCase().includes("margin")) {
+        return `${(val * 100).toFixed(1)}%`;
+      }
+      return val.toString();
+    }
+    return String(val);
+  };
+
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {changedKeys.map((key) => {
+        const label = LABELS[key] || key.toUpperCase();
+        const beforeVal = formatValue(key, before[key]);
+        const afterVal = formatValue(key, after[key]);
+
+        return (
+          <div key={key} className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest">
+            <span className="text-[var(--text-muted)]">{label}</span>
+            <span className="inline-flex items-center gap-1 rounded-sm border border-red-500/20 bg-red-500/5 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-red-400/80">
+              {beforeVal}
+            </span>
+            <span className="text-[var(--text-muted)]">→</span>
+            <span className="inline-flex items-center gap-1 rounded-sm border border-emerald-500/20 bg-emerald-500/5 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-emerald-400/80">
+              {afterVal}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function ApprovalsTab() {
   const queryClient = useQueryClient();
@@ -100,6 +165,7 @@ export function ApprovalsTab() {
                     {approval.description}
                   </p>
                 )}
+                {renderDiffChips(approval.beforeJson, approval.afterJson)}
                 <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
                   {approval.confidence !== null && (
                     <span>Confidence: {(approval.confidence * 100).toFixed(0)}%</span>

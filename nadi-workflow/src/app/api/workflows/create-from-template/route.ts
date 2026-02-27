@@ -4,17 +4,18 @@ import { writeAudit } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
   try {
-    const { sourceTemplateId, name, description } = await req.json();
+    const { sourceTemplateId, templateId, name, description } = await req.json();
+    const resolvedTemplateId = sourceTemplateId ?? templateId;
 
-    if (!sourceTemplateId || !name) {
+    if (!resolvedTemplateId || !name) {
       return NextResponse.json(
-        { error: "sourceTemplateId and name are required" },
+        { error: "templateId or sourceTemplateId and name are required" },
         { status: 400 }
       );
     }
 
     const source = await prisma.workflowTemplate.findUnique({
-      where: { id: sourceTemplateId },
+      where: { id: resolvedTemplateId },
     });
 
     if (!source) {

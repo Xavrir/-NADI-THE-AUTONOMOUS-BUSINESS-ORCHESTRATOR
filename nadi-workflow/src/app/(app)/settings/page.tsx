@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShoppingBag, Truck, CreditCard, BarChart3, Plug, RefreshCw, Brain, RotateCcw } from "lucide-react";
+import { ShoppingBag, Truck, CreditCard, BarChart3, Plug, RefreshCw, Brain, RotateCcw, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -43,6 +43,8 @@ export default function SettingsPage() {
   const [isToggling, setIsToggling] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [resetResult, setResetResult] = useState<string | null>(null);
+  const [syncingConnector, setSyncingConnector] = useState<string | null>(null);
+  const [syncResult, setSyncResult] = useState<Record<string, { success: boolean; message: string }>>({});
 
   const { data: connectors, isLoading } = useQuery<Connector[]>({
     queryKey: ["integrations"],
@@ -63,10 +65,38 @@ export default function SettingsPage() {
         body: JSON.stringify({ provider }),
       });
       await queryClient.invalidateQueries({ queryKey: ["llm-provider"] });
-    } catch (error) {
-      console.error("Failed to toggle provider:", error);
+    } catch {
+      console.error("Failed to toggle provider");
     } finally {
       setIsToggling(false);
+    }
+  };
+
+  const handleSync = async (connectorId: string) => {
+    setSyncingConnector(connectorId);
+    setSyncResult((prev) => ({ ...prev, [connectorId]: { success: false, message: "" } }));
+    try {
+      const res = await fetch("/api/integrations/shopify/sync", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        setSyncResult((prev) => ({
+          ...prev,
+          [connectorId]: { success: true, message: data.message || "Synced successfully" },
+        }));
+        await queryClient.invalidateQueries({ queryKey: ["integrations"] });
+      } else {
+        setSyncResult((prev) => ({
+          ...prev,
+          [connectorId]: { success: false, message: data.error || "Sync failed" },
+        }));
+      }
+    } catch {
+      setSyncResult((prev) => ({
+        ...prev,
+        [connectorId]: { success: false, message: "Network error" },
+      }));
+    } finally {
+      setSyncingConnector(null);
     }
   };
 
@@ -116,6 +146,8 @@ export default function SettingsPage() {
                 const Icon = connectorIcons[conn.type] ?? Plug;
                 const desc = connectorDescriptions[conn.type] ?? "External integration.";
                 const st = statusMap[conn.status] ?? statusMap.inactive;
+                const isSyncing = syncingConnector === conn.id;
+                const result = syncResult[conn.id];
 
                 return (
                   <div
@@ -153,15 +185,40 @@ export default function SettingsPage() {
                       <Button variant="ghost" size="sm" disabled>
                         Configure
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1.5"
-                        disabled
-                      >
-                        Test Connection
-                      </Button>
+                      {conn.type === "shopify" && conn.status === "active" ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
+                          onClick={() => handleSync(conn.id)}
+                          disabled={isSyncing}
+                        >
+                          {isSyncing ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Syncing...
+                            </>
+                          ) : (
+                            "Sync Now"
+                          )}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
+                          disabled
+                        >
+                          Test Connection
+                        </Button>
+                      )}
                     </div>
+
+                    {result && (
+                      <p className={`text-xs font-mono ${result.success ? "text-green-500" : "text-red-500"}`}>
+                        {result.message}
+                      </p>
+                    )}
                   </div>
                 );
               })}

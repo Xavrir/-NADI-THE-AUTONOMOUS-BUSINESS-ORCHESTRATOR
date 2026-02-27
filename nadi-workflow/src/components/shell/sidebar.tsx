@@ -103,7 +103,7 @@ export function Sidebar() {
               <span className="truncate">{item.label}</span>
               {item.tag && (
                 <span className={cn(
-                  "ml-auto text-[9px] font-mono px-1.5 py-0.5 border rounded-sm",
+                  "ml-auto shrink-0 text-[9px] font-mono px-1.5 py-0.5 border rounded-sm whitespace-nowrap",
                   isActive ? "border-[#000]/20 text-[#000]" : "border-[var(--border)] text-[var(--text-muted)]"
                 )}>
                   {item.tag}

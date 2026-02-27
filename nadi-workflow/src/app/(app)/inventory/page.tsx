@@ -109,33 +109,45 @@ export default function InventoryPage() {
       />
 
       <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-3">
-          <div className="card-elevated p-3">
-            <div className="flex items-center gap-2">
-              <Package className="h-4 w-4 text-[var(--primary)]" />
-              <p className="text-xs text-[var(--text-muted)]">Total SKUs</p>
+        {isLoading ? (
+          <>
+            <div className="grid grid-cols-3 gap-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-20 rounded-sm" />
+              ))}
             </div>
-            <p className="mt-1 font-mono text-xl font-bold text-[var(--text-primary)]">{rows.length}</p>
-          </div>
-          <div className="card-elevated p-3">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-[var(--warning)]" />
-              <p className="text-xs text-[var(--text-muted)]">Low Stock</p>
+            <Skeleton className="h-64 w-full rounded-sm" />
+          </>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="card-elevated p-3">
+                <div className="flex items-center gap-2">
+                  <Package className="h-4 w-4 text-[var(--primary)]" />
+                  <p className="text-xs text-[var(--text-muted)]">Total SKUs</p>
+                </div>
+                <p className="mt-1 font-mono text-xl font-bold text-[var(--text-primary)]">{rows.length}</p>
+              </div>
+              <div className="card-elevated p-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-[var(--warning)]" />
+                  <p className="text-xs text-[var(--text-muted)]">Low Stock</p>
+                </div>
+                <p className="mt-1 font-mono text-xl font-bold text-[var(--warning)]">{lowStockCount}</p>
+              </div>
+              <div className="card-elevated p-3">
+                <div className="flex items-center gap-2">
+                  <TrendingDown className="h-4 w-4 text-[var(--danger)]" />
+                  <p className="text-xs text-[var(--text-muted)]">Critical</p>
+                </div>
+                <p className="mt-1 font-mono text-xl font-bold text-[var(--danger)]">
+                  {rows.filter((r) => r.status === "critical").length}
+                </p>
+              </div>
             </div>
-            <p className="mt-1 font-mono text-xl font-bold text-[var(--warning)]">{lowStockCount}</p>
-          </div>
-          <div className="card-elevated p-3">
-            <div className="flex items-center gap-2">
-              <TrendingDown className="h-4 w-4 text-[var(--danger)]" />
-              <p className="text-xs text-[var(--text-muted)]">Critical</p>
-            </div>
-            <p className="mt-1 font-mono text-xl font-bold text-[var(--danger)]">
-              {rows.filter((r) => r.status === "critical").length}
-            </p>
-          </div>
-        </div>
-
-        {isLoading ? <Skeleton className="h-64 w-full" /> : <DataTable columns={columns} data={rows} />}
+            <DataTable columns={columns} data={rows} />
+          </>
+        )}
       </div>
     </div>
   );

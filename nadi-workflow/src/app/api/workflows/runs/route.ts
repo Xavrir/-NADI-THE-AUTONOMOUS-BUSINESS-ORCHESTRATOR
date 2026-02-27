@@ -34,8 +34,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "templateId required" }, { status: 400 });
     }
 
-    const { runWorkflow } = await import("@/lib/run-engine");
-    const result = await runWorkflow(templateId, triggerType ?? "manual");
+    const engineModule =
+      process.env.WORKFLOW_ENGINE === "langgraph"
+        ? await import("@/lib/langgraph/runner")
+        : await import("@/lib/run-engine");
+
+    const runFn =
+      "runWorkflowLangGraph" in engineModule
+        ? engineModule.runWorkflowLangGraph
+        : engineModule.runWorkflow;
+
+    const result = await runFn(templateId, triggerType ?? "manual");
 
     return NextResponse.json({
       id: result.runId,

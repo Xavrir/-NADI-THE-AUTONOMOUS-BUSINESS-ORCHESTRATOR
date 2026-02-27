@@ -91,8 +91,19 @@ export default function DashboardPage() {
     return (
       <div>
         <PageHeader title="Dashboard" subtitle="NADI Streetwear operational overview" />
-        <div className="grid gap-4 md:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}
+        <div className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-28 rounded-sm" />
+            ))}
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-4">
+              <Skeleton className="h-48 rounded-sm" />
+              <Skeleton className="h-48 rounded-sm" />
+            </div>
+            <Skeleton className="h-64 rounded-sm" />
+          </div>
         </div>
       </div>
     );

@@ -86,20 +86,20 @@ async function main() {
 
   await prisma.approval.createMany({
     data: [
-      {
-        id: "apr-001",
-        actionType: "price_change",
-        targetType: "product",
-        targetId: "NADI-CARGO-GRY",
-        riskLevel: "medium",
-        status: "pending",
-        confidence: 0.88,
-        title: "Price increase: Cargo Jogger on TikTok Shop",
-        description: "Margin below threshold on TikTok Shop channel (18% fee). Recommended price increase from Rp 349,000 to Rp 399,000.",
-        beforeJson: JSON.stringify({ price: 349000, channel: "tiktok_shop", netMarginPct: 0.476 }),
-        afterJson: JSON.stringify({ price: 399000, channel: "tiktok_shop", netMarginPct: 0.571 }),
-        evidenceJson: JSON.stringify({ evidenceId: eid("000010"), pipeline: "P2", runId: "RUN-P2-001" }),
-      },
+       {
+         id: "apr-001",
+         actionType: "price_change",
+         targetType: "product",
+         targetId: "NADI-CARGO-GRY",
+         riskLevel: "medium",
+         status: "pending",
+         confidence: 0.88,
+         title: "Price increase: Cargo Jogger on TikTok Shop",
+         description: "Margin below threshold on TikTok Shop channel (18% fee). Recommended price increase from Rp 349,000 to Rp 399,000.",
+         beforeJson: JSON.stringify({ price: 349000, channel: "tiktok_shop", netMarginPct: 0.476 }),
+         afterJson: JSON.stringify({ sku: "NADI-CARGO-GRY", price: 399000, channel: "tiktok_shop", cogs: 120000, feePct: 0.18, netMarginPct: 0.571, status: "warning" }),
+         evidenceJson: JSON.stringify({ evidenceId: eid("000010"), pipeline: "P2", runId: "RUN-P2-001" }),
+       },
       {
         id: "apr-002",
         actionType: "restock",

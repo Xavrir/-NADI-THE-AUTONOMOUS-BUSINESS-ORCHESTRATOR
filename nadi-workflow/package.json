@@ -13,6 +13,9 @@
     "seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@langchain/core": "^1.1.29",
+    "@langchain/langgraph": "^1.2.0",
+    "@langchain/langgraph-checkpoint-sqlite": "^1.0.1",
     "@prisma/client": "^6",
     "@tanstack/react-query": "^5",
     "@tanstack/react-table": "^8",

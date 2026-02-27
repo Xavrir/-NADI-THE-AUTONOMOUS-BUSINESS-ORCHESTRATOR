@@ -86,7 +86,19 @@ export default function GovernancePage() {
 
         <TabsContent value="policies">
           {isLoading ? (
-            <Skeleton className="h-64 w-full" />
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-6 w-48 rounded-sm" />
+              </div>
+              <div className="grid gap-6 md:grid-cols-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton key={i} className="h-40 rounded-sm" />
+                ))}
+              </div>
+              <div className="flex justify-end">
+                <Skeleton className="h-10 w-32 rounded-sm" />
+              </div>
+            </div>
           ) : (
             <div className="space-y-6">
               {/* Version badge */}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar as CalendarIcon, ImagePlus, ChevronLeft, ChevronRight, Plus, ExternalLink } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Calendar as CalendarIcon, ImagePlus, ChevronLeft, ChevronRight, Plus, ExternalLink, Loader2 } from "lucide-react";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay } from "date-fns";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusChip } from "@/components/shared/status-chip";
@@ -11,22 +12,22 @@ import { Button } from "@/components/ui/button";
 const DEMO_TODAY = new Date(2026, 2, 25); 
 
 const MOCK_EVENTS = [
-  { id: 1, date: new Date(2026, 2, 23), content: "Product spotlight", channel: "IG", status: "published", type: "Image" },
-  { id: 2, date: new Date(2026, 2, 24), content: "Roasting process", channel: "TikTok", status: "published", type: "Video" },
-  { id: 3, date: new Date(2026, 2, 25), content: "Customer review", channel: "IG Story", status: "scheduled", type: "Carousel" },
-  { id: 4, date: new Date(2026, 2, 26), content: "15% off Americano", channel: "Shopee", status: "scheduled", type: "Banner" },
-  { id: 5, date: new Date(2026, 2, 27), content: "Weekend bundle", channel: "Tokopedia", status: "draft", type: "Listing" },
-  { id: 6, date: new Date(2026, 2, 28), content: "Barista tip", channel: "IG Reels", status: "draft", type: "Video" },
-  { id: 7, date: new Date(2026, 2, 29), content: "Week recap", channel: "WhatsApp", status: "pending", type: "Text" },
-  { id: 8, date: new Date(2026, 2, 5), content: "Payday Promo", channel: "All", status: "published", type: "Campaign" },
-  { id: 9, date: new Date(2026, 3, 2), content: "Ramadan Teaser", channel: "IG", status: "draft", type: "Image" },
-  { id: 10, date: new Date(2026, 1, 14), content: "Valentine's Special", channel: "TikTok", status: "published", type: "Video" },
+  { id: 1, date: new Date(2026, 2, 23), content: "New Arrivals Drop", channel: "IG", status: "published", type: "Carousel" },
+  { id: 2, date: new Date(2026, 2, 24), content: "Behind the Stitch", channel: "TikTok", status: "published", type: "Video" },
+  { id: 3, date: new Date(2026, 2, 25), content: "Customer fit check", channel: "IG Story", status: "scheduled", type: "Carousel" },
+  { id: 4, date: new Date(2026, 2, 26), content: "Flash sale Cargo Jogger", channel: "Shopify", status: "scheduled", type: "Banner" },
+  { id: 5, date: new Date(2026, 2, 27), content: "Weekend streetwear bundle", channel: "Tokopedia", status: "draft", type: "Listing" },
+  { id: 6, date: new Date(2026, 2, 28), content: "Styling tips: Hoodie layering", channel: "IG Reels", status: "draft", type: "Video" },
+  { id: 7, date: new Date(2026, 2, 29), content: "Week recap + top sellers", channel: "WhatsApp", status: "pending", type: "Text" },
+  { id: 8, date: new Date(2026, 2, 5), content: "Payday Drop Promo", channel: "All", status: "published", type: "Campaign" },
+  { id: 9, date: new Date(2026, 3, 2), content: "Ramadan Collection Teaser", channel: "IG", status: "draft", type: "Image" },
+  { id: 10, date: new Date(2026, 1, 14), content: "Valentine's Couple Sets", channel: "TikTok", status: "published", type: "Video" },
 ];
 
 const CONTENT_PACKS = [
-  { title: "March Coffee Festival Pack", items: 12, status: "ready", description: "Social assets for Jakarta Coffee Week partnership" },
-  { title: "Ramadan Campaign 2026", items: 8, status: "in_progress", description: "Iftar bundle promotions and story templates" },
-  { title: "New Product Launch: Oat Latte", items: 5, status: "draft", description: "Launch week content for all channels" },
+  { title: "March New Arrivals Pack", items: 12, status: "ready", description: "Social assets for Spring collection launch across all channels" },
+  { title: "Ramadan Campaign 2026", items: 8, status: "in_progress", description: "Modest streetwear bundles and story templates for Ramadan" },
+  { title: "Collaboration Drop: Local Artists", items: 5, status: "draft", description: "Limited edition graphic tee launch content for all channels" },
 ];
 
 const statusColors: Record<string, { variant: "success" | "warning" | "info" | "neutral" | "danger"; label: string }> = {
@@ -40,6 +41,47 @@ const statusColors: Record<string, { variant: "success" | "warning" | "info" | "
 
 export default function MarketingPage() {
   const [currentDate, setCurrentDate] = useState(DEMO_TODAY);
+
+  const { data: runs, isLoading } = useQuery({
+    queryKey: ["workflow-runs"],
+    queryFn: async () => {
+      const res = await fetch("/api/workflows/runs");
+      if (!res.ok) throw new Error("Failed to fetch runs");
+      return res.json();
+    },
+  });
+
+  const realContentPacks = (runs || [])
+    .filter((run: any) => run.templateId === "tpl-marketing-weekly" && run.status === "completed")
+    .map((run: any) => {
+      const aiNode = run.nodeRuns.find((nr: any) => nr.nodeType === "ai" || nr.nodeId.includes("ai"));
+      const output = aiNode?.outputJson;
+      
+      if (output?.packs && Array.isArray(output.packs)) {
+        return output.packs.map((p: any) => ({
+          title: p.title || "AI Generated Pack",
+          items: p.items || 0,
+          status: "ready",
+          description: p.description || "Generated by Marketing Weekly pipeline",
+          isReal: true
+        }));
+      }
+      
+      if (output?.title) {
+         return [{
+            title: output.title,
+            items: output.items || 0,
+            status: "ready",
+            description: output.description || "Generated by Marketing Weekly pipeline",
+            isReal: true
+         }];
+      }
+
+      return [];
+    })
+    .flat();
+
+  const displayPacks = realContentPacks.length > 0 ? [...realContentPacks, ...CONTENT_PACKS] : CONTENT_PACKS;
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
@@ -153,15 +195,24 @@ export default function MarketingPage() {
             <Button variant="ghost" size="sm" className="h-8 font-mono text-xs text-[var(--primary)] hover:bg-[var(--primary)]/10 rounded-none">View Archive <ExternalLink className="h-3 w-3 ml-1" /></Button>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {CONTENT_PACKS.map((pack) => {
+            {isLoading && (
+              <div className="col-span-full flex items-center justify-center p-12 border border-dashed border-[var(--border)] rounded-sm bg-[var(--surface)]">
+                <Loader2 className="h-6 w-6 animate-spin text-[var(--primary)] mr-2" />
+                <span className="font-mono text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">Fetching pipeline data...</span>
+              </div>
+            )}
+            {!isLoading && displayPacks.map((pack, idx) => {
               const st = statusColors[pack.status] ?? statusColors.draft;
               return (
                 <div
-                  key={pack.title}
-                  className="card-elevated p-0 group flex flex-col border-[var(--border)] overflow-hidden"
+                  key={`${pack.title}-${idx}`}
+                  className={`card-elevated p-0 group flex flex-col border-[var(--border)] overflow-hidden ${pack.isReal ? 'border-[var(--primary)]/50 shadow-[4px_4px_0px_0px_color-mix(in_srgb,var(--primary)_20%,transparent)]' : ''}`}
                 >
                   <div className="p-4 border-b border-[var(--border)] flex justify-between items-start bg-[var(--surface)]">
-                    <h3 className="text-sm font-bold font-display text-[var(--text-primary)] group-hover:text-[var(--primary)] transition-colors">{pack.title}</h3>
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-sm font-bold font-display text-[var(--text-primary)] group-hover:text-[var(--primary)] transition-colors">{pack.title}</h3>
+                      {pack.isReal && <span className="font-mono text-[8px] font-bold text-[var(--primary)] uppercase tracking-tighter">Pipeline Generated</span>}
+                    </div>
                     <StatusChip variant={st.variant} label={st.label} className="rounded-sm font-mono tracking-widest text-[9px] uppercase border-[var(--border)]" />
                   </div>
                   <div className="p-4 flex-1">
