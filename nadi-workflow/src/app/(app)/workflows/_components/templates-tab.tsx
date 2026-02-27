@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Play, Zap, GitBranch, ShieldCheck, BarChart3, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Play, Zap, GitBranch, ShieldCheck, BarChart3, Loader2, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusChip } from "@/components/shared/status-chip";
@@ -125,7 +126,15 @@ export function TemplatesTab() {
           )}
 
           {/* Actions */}
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            {tpl.configJson.nodes.length > 0 && (
+              <Link href={`/workflows/builder?template=${tpl.id}`}>
+                <Button variant="ghost" size="sm" className="gap-1.5">
+                  <PenTool className="h-3.5 w-3.5" />
+                  Builder
+                </Button>
+              </Link>
+            )}
             <Button
               variant="outline"
               size="sm"
