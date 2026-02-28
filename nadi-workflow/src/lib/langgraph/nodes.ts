@@ -712,10 +712,8 @@ export function getExecutor(
         const updates: Partial<WorkflowState> = { data: {}, nodesCompleted: 1 };
 
         try {
-        console.log(`[execute] actionType="${actionType}" (type=${typeof actionType}) for node=${id} run=${state.runId}`);
         switch (actionType) {
           case "post_ledger_entries": {
-            console.log(`[execute] ENTERING post_ledger_entries case`);
             const desc = (state.data.description as string) ?? "Imported transaction";
             const debit = (state.data.debit as number) ?? 0;
             const credit = (state.data.credit as number) ?? 0;
@@ -992,8 +990,7 @@ export function getExecutor(
           }
 
           default: {
-            console.log(`[execute] HIT DEFAULT case for actionType="${actionType}"`);
-            output = { label, actionType, message: `Action executed: ${actionType}`, affectedRecords: 1, _debug_actionType: actionType, _debug_type: typeof actionType, _debug_charCodes: Array.from(actionType).map((c: string) => c.charCodeAt(0)), _debug_configKeys: Object.keys(config ?? {}), _debug_configRaw: JSON.stringify(config) };
+            output = { label, actionType, message: `Action executed: ${actionType}`, affectedRecords: 1 };
           }
         }
         } catch (execErr: unknown) {
@@ -1001,11 +998,6 @@ export function getExecutor(
           console.error(`[execute:${actionType}] Error:`, errMsg);
           output = { label, actionType, message: `Action ${actionType} failed: ${errMsg}`, error: true };
         }
-
-        output._v = "2026-02-28-v7";
-        output._configActionType = config?.actionType;
-        output._switchTarget = actionType;
-        output._match = actionType === "post_ledger_entries" ? "YES_MATCH" : "NO_MATCH";
 
         await prisma.nodeRun.create({
           data: {
