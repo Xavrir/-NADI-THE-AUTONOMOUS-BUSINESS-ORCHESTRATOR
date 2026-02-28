@@ -26,7 +26,8 @@ interface TemplateConfig {
 
 export async function runWorkflowLangGraph(
   templateId: string,
-  triggerType: string = "manual"
+  triggerType: string = "manual",
+  input?: Record<string, unknown>
 ): Promise<{
   runId: string;
   status: string;
@@ -66,7 +67,7 @@ export async function runWorkflowLangGraph(
     templateId,
     templateName: template.name,
     triggerType,
-    data: {},
+    data: input ?? {},
     nodesCompleted: 0,
     nodesFailed: 0,
     sideEffects: [],

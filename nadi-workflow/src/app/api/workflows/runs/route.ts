@@ -28,7 +28,7 @@ export async function GET() {
 /* -- POST /api/workflows/runs — Trigger a new workflow run -------- */
 export async function POST(req: NextRequest) {
   try {
-    const { templateId, triggerType } = await req.json();
+    const { templateId, triggerType, input } = await req.json();
 
     if (!templateId) {
       return NextResponse.json({ error: "templateId required" }, { status: 400 });
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         ? engineModule.runWorkflowLangGraph
         : engineModule.runWorkflow;
 
-    const result = await runFn(templateId, triggerType ?? "manual");
+    const result = await runFn(templateId, triggerType ?? "manual", input);
 
     return NextResponse.json({
       id: result.runId,

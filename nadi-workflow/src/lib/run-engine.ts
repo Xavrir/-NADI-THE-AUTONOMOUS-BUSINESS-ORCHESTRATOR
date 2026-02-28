@@ -475,7 +475,8 @@ async function executeNode(node: NodeConfig, ctx: RunContext): Promise<NodeResul
 
 export async function runWorkflow(
   templateId: string,
-  triggerType: string = "manual"
+  triggerType: string = "manual",
+  _input?: Record<string, unknown>
 ): Promise<{
   runId: string;
   status: string;

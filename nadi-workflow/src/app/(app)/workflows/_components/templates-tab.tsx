@@ -6,6 +6,7 @@ import { Play, Zap, GitBranch, ShieldCheck, BarChart3, Loader2, PenTool } from "
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusChip } from "@/components/shared/status-chip";
+import { RunWorkflowDialog } from "./run-workflow-dialog";
 
 interface TemplateNode {
   id: string;
@@ -22,6 +23,14 @@ interface Template {
   configJson: {
     nodes: TemplateNode[];
     edges: Array<{ source: string; target: string; label?: string }>;
+    inputSchema?: Array<{
+      name: string;
+      label: string;
+      type: "text" | "textarea" | "number" | "select";
+      placeholder?: string;
+      required?: boolean;
+      options?: string[];
+    }>;
   };
   createdAt: string;
 }
@@ -57,11 +66,11 @@ export function TemplatesTab() {
   });
 
   const runMutation = useMutation({
-    mutationFn: async (templateId: string) => {
+    mutationFn: async ({ templateId, input }: { templateId: string; input: Record<string, unknown> }) => {
       const res = await fetch("/api/workflows/runs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ templateId, triggerType: "manual" }),
+        body: JSON.stringify({ templateId, triggerType: "manual", input }),
       });
       if (!res.ok) throw new Error(await res.text());
       return res.json();
@@ -135,19 +144,12 @@ export function TemplatesTab() {
                 </Button>
               </Link>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              disabled={runMutation.isPending || tpl.configJson.nodes.length === 0}
-              onClick={() => runMutation.mutate(tpl.id)}
-            >
-              {runMutation.isPending && runMutation.variables === tpl.id ? (
-                <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Running...</>
-              ) : (
-                <><Play className="h-3.5 w-3.5" /> Run</>
-              )}
-            </Button>
+            <RunWorkflowDialog
+              template={tpl}
+              onRun={(id, input) => runMutation.mutate({ templateId: id, input })}
+              isPending={runMutation.isPending}
+              pendingTemplateId={runMutation.variables?.templateId ?? null}
+            />
           </div>
         </div>
       ))}

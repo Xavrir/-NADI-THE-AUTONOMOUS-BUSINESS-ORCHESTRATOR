@@ -213,6 +213,7 @@ async function main() {
       version: 1,
       configJson: JSON.stringify({
         entryNodeId: "trigger",
+        inputSchema: [],
         nodes: [
           { id: "trigger", type: "trigger", label: "CSV Import", config: { triggerType: "csv_import" } },
           { id: "normalize", type: "logic", label: "Normalize & Dedupe", config: { task: "normalize_deduplicate" } },
@@ -243,6 +244,9 @@ async function main() {
       version: 1,
       configJson: JSON.stringify({
         entryNodeId: "trigger",
+        inputSchema: [
+          { name: "sku", label: "SKU", type: "text", placeholder: "Leave empty to scan all SKUs" },
+        ],
         nodes: [
           { id: "trigger", type: "trigger", label: "Schedule / Manual", config: { triggerType: "manual" } },
           { id: "fetch", type: "logic", label: "Fetch Unit Economics", config: { task: "fetch_unit_economics" } },
@@ -274,6 +278,10 @@ async function main() {
       version: 1,
       configJson: JSON.stringify({
         entryNodeId: "trigger",
+        inputSchema: [
+          { name: "campaign_theme", label: "Campaign Theme", type: "text", placeholder: "e.g. Ramadan Collection Drop", required: true },
+          { name: "budget_idr", label: "Budget (Rp)", type: "number", placeholder: "500000" },
+        ],
         nodes: [
           { id: "trigger", type: "trigger", label: "Weekly Schedule", config: { triggerType: "weekly_schedule" } },
           { id: "fetch_signals", type: "logic", label: "Fetch Market Signals", config: { task: "fetch_market_signals" } },
@@ -308,6 +316,11 @@ async function main() {
       version: 1,
       configJson: JSON.stringify({
         entryNodeId: "trigger",
+        inputSchema: [
+          { name: "order_id", label: "Order ID", type: "text", placeholder: "ORD-2026-XXXX", required: true },
+          { name: "customer_name", label: "Customer Name", type: "text", placeholder: "Customer name", required: true },
+          { name: "items", label: "Items Ordered", type: "text", placeholder: "e.g. Oversized Tee x2, Cargo Jogger x1", required: true },
+        ],
         nodes: [
           { id: "trigger", type: "trigger", label: "Order Received", config: { triggerType: "order_webhook" } },
           { id: "normalize", type: "logic", label: "Normalize Order", config: { task: "normalize_order" } },
@@ -340,6 +353,10 @@ async function main() {
       version: 1,
       configJson: JSON.stringify({
         entryNodeId: "trigger",
+        inputSchema: [
+          { name: "request_description", label: "Request Description", type: "textarea", placeholder: "Describe the approval request...", required: true },
+          { name: "amount_idr", label: "Amount (Rp)", type: "number", placeholder: "0" },
+        ],
         nodes: [
           { id: "trigger", type: "trigger", label: "New Approval", config: { triggerType: "approval_created" } },
           { id: "classify", type: "ai", label: "Classify Urgency", config: { task: "classify_general" } },
@@ -371,6 +388,9 @@ async function main() {
       version: 1,
       configJson: JSON.stringify({
         entryNodeId: "trigger",
+        inputSchema: [
+          { name: "sku", label: "SKU", type: "text", placeholder: "Leave empty to scan all SKUs" },
+        ],
         nodes: [
           { id: "trigger", type: "trigger", label: "Stock Monitor", config: { triggerType: "schedule" } },
           { id: "scan", type: "logic", label: "Scan Inventory", config: { task: "scan_low_stock" } },
@@ -401,6 +421,10 @@ async function main() {
       version: 1,
       configJson: JSON.stringify({
         entryNodeId: "trigger",
+        inputSchema: [
+          { name: "customer_name", label: "Customer Name", type: "text", placeholder: "Customer name", required: true },
+          { name: "message", label: "Ticket Message", type: "textarea", placeholder: "Customer message or complaint...", required: true },
+        ],
         nodes: [
           { id: "trigger", type: "trigger", label: "CS Ticket", config: { triggerType: "cs_ticket" } },
           { id: "classify", type: "ai", label: "Classify & Sentiment", config: { task: "classify_general" } },
@@ -429,6 +453,11 @@ async function main() {
       version: 1,
       configJson: JSON.stringify({
         entryNodeId: "trigger",
+        inputSchema: [
+          { name: "phone", label: "Phone Number", type: "text", placeholder: "08xxxxxxxxxx", required: true },
+          { name: "order_id", label: "Order ID", type: "text", placeholder: "ORD-2026-XXXX", required: true },
+          { name: "notification_type", label: "Notification Type", type: "select", options: ["order_confirmed", "shipped", "delivered"], required: true },
+        ],
         nodes: [
           { id: "trigger", type: "trigger", label: "Order Event", config: { triggerType: "wa_event" } },
           { id: "build_msg", type: "logic", label: "Build Message", config: { task: "build_wa_payload" } },
