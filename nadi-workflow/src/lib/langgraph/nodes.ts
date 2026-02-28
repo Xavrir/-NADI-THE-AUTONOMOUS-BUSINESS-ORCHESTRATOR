@@ -1002,6 +1002,11 @@ export function getExecutor(
           output = { label, actionType, message: `Action ${actionType} failed: ${errMsg}`, error: true };
         }
 
+        output._v = "2026-02-28-v7";
+        output._configActionType = config?.actionType;
+        output._switchTarget = actionType;
+        output._match = actionType === "post_ledger_entries" ? "YES_MATCH" : "NO_MATCH";
+
         await prisma.nodeRun.create({
           data: {
             runId: state.runId,
