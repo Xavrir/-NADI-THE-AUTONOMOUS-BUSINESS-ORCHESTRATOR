@@ -993,7 +993,7 @@ export function getExecutor(
 
           default: {
             console.log(`[execute] HIT DEFAULT case for actionType="${actionType}"`);
-            output = { label, actionType, message: `Action executed: ${actionType}`, affectedRecords: 1 };
+            output = { label, actionType, message: `Action executed: ${actionType}`, affectedRecords: 1, _debug_actionType: actionType, _debug_type: typeof actionType, _debug_charCodes: Array.from(actionType).map((c: string) => c.charCodeAt(0)), _debug_configKeys: Object.keys(config ?? {}), _debug_configRaw: JSON.stringify(config) };
           }
         }
         } catch (execErr: unknown) {
