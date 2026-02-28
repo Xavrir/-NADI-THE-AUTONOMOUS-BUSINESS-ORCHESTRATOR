@@ -75,7 +75,7 @@ export function TemplatesTab() {
   if (isLoading) return <Skeleton className="h-64 w-full" />;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 pb-20 md:grid-cols-2">
       {templates?.map((tpl) => (
         <div
           key={tpl.id}

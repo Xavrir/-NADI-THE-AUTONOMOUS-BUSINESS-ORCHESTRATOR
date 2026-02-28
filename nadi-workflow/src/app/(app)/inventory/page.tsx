@@ -50,7 +50,7 @@ export default function InventoryPage() {
     });
   }, [raw]);
 
-  const lowStockCount = rows.filter((r) => r.status !== "ok").length;
+  const lowStockCount = rows.filter((r) => r.status === "low").length;
 
   const columns: ColumnDef<InventoryRow>[] = useMemo(
     () => [
