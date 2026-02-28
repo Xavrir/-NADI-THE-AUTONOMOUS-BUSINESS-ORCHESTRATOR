@@ -119,7 +119,7 @@ export function CsvImportWizard() {
           Import CSV
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl border-[var(--border)] bg-[var(--surface)]">
+      <DialogContent className="max-w-3xl border-[var(--border)] bg-[var(--surface)]">
         <DialogHeader>
           <DialogTitle className="font-display text-lg font-bold text-[var(--text-primary)]">
             {step === "upload" && "Upload Bank CSV"}
@@ -173,7 +173,7 @@ export function CsvImportWizard() {
             </div>
 
             <div className="max-h-64 overflow-auto rounded-lg border border-[var(--border)]">
-              <table className="w-full text-xs">
+              <table className="min-w-full text-xs">
                 <thead>
                   <tr className="border-b border-[var(--border)] bg-[var(--card)]">
                     {headers.map((h) => (
@@ -188,7 +188,7 @@ export function CsvImportWizard() {
                 </thead>
                 <tbody>
                   {rows.slice(0, 10).map((row, i) => (
-                    <tr key={i} className="border-b border-[var(--border)]">
+                    <tr key={i} className="border-b border-[var(--border)] even:bg-[var(--card)]/50">
                       {headers.map((h) => (
                         <td key={h} className="whitespace-nowrap px-3 py-1.5 text-[var(--text-secondary)]">
                           {row[h] || "—"}
