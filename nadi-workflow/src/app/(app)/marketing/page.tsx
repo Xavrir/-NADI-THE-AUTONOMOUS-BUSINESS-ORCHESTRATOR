@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Calendar as CalendarIcon, ImagePlus, ChevronLeft, ChevronRight, Plus, ExternalLink, Loader2, Play, Zap } from "lucide-react";
+import { Calendar as CalendarIcon, ImagePlus, ChevronLeft, ChevronRight, Plus, Loader2, Play, Zap } from "lucide-react";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay } from "date-fns";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusChip } from "@/components/shared/status-chip";
