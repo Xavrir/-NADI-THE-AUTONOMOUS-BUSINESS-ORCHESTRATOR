@@ -3,29 +3,35 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 
 export async function POST(req: Request) {
-  const body = await req.json();
-  const { email, password } = body;
+  try {
+    const body = await req.json();
+    const { email, password } = body;
 
-  if (!email || !password) {
-    return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
+    if (!email || !password) {
+      return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || user.password !== password) {
+      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+    }
+
+    const sessionPayload = JSON.stringify({ id: user.id, name: user.name, email: user.email });
+    const encoded = Buffer.from(sessionPayload).toString("base64");
+
+    const jar = await cookies();
+    jar.set("nadi_session", encoded, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return NextResponse.json({ id: user.id, name: user.name, email: user.email });
+  } catch (error) {
+    console.error("[login] Error:", error);
+    const message = error instanceof Error ? error.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || user.password !== password) {
-    return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
-  }
-
-  const sessionPayload = JSON.stringify({ id: user.id, name: user.name, email: user.email });
-  const encoded = Buffer.from(sessionPayload).toString("base64");
-
-  const jar = await cookies();
-  jar.set("nadi_session", encoded, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
-
-  return NextResponse.json({ id: user.id, name: user.name, email: user.email });
 }
