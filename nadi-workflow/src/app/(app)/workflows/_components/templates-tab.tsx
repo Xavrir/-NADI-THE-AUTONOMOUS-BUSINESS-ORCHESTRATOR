@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { Play, Zap, GitBranch, ShieldCheck, BarChart3, Loader2, PenTool } from "lucide-react";
+import { Play, Zap, GitBranch, ShieldCheck, BarChart3, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusChip } from "@/components/shared/status-chip";

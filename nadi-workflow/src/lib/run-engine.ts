@@ -476,7 +476,7 @@ async function executeNode(node: NodeConfig, ctx: RunContext): Promise<NodeResul
 export async function runWorkflow(
   templateId: string,
   triggerType: string = "manual",
-  _input?: Record<string, unknown>
+  _input?: Record<string, unknown> // eslint-disable-line @typescript-eslint/no-unused-vars
 ): Promise<{
   runId: string;
   status: string;

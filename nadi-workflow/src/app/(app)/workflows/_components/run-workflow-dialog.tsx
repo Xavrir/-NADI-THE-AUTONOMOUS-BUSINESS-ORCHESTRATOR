@@ -24,7 +24,7 @@ interface Template {
   name: string;
   configJson: {
     inputSchema?: InputField[];
-    nodes: any[];
+    nodes: Array<{ id: string }>;
   };
 }
 
@@ -42,7 +42,7 @@ export function RunWorkflowDialog({
   pendingTemplateId,
 }: RunWorkflowDialogProps) {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formData, setFormData] = useState<Record<string, string | number>>({});
 
   const inputSchema = template.configJson.inputSchema || [];
   const hasInputSchema = inputSchema.length > 0;
@@ -68,7 +68,7 @@ export function RunWorkflowDialog({
     setOpen(false);
   };
 
-  const handleChange = (name: string, value: any) => {
+  const handleChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
