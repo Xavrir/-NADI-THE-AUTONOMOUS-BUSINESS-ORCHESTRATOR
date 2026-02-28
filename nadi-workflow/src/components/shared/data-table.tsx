@@ -45,7 +45,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="overflow-hidden card-elevated">
+    <div className="overflow-x-auto card-elevated">
       <Table className={cn(density === "dense" && "dense-table")}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

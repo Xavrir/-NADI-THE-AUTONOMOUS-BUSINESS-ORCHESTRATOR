@@ -1,6 +1,5 @@
 import { TopBar } from "@/components/shell/top-bar";
 import { Sidebar } from "@/components/shell/sidebar";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,9 +7,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <TopBar />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <ScrollArea className="flex-1">
-          <main className="p-6">{children}</main>
-        </ScrollArea>
+        <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <main className="min-w-0 overflow-hidden p-6">{children}</main>
+        </div>
       </div>
     </div>
   );
