@@ -711,6 +711,7 @@ export function getExecutor(
         let output: Record<string, unknown> = {};
         const updates: Partial<WorkflowState> = { data: {}, nodesCompleted: 1 };
 
+        try {
         switch (actionType) {
           case "post_ledger_entries": {
             const desc = (state.data.description as string) ?? "Imported transaction";
@@ -991,6 +992,11 @@ export function getExecutor(
           default: {
             output = { label, actionType, message: `Action executed: ${actionType}`, affectedRecords: 1 };
           }
+        }
+        } catch (execErr: unknown) {
+          const errMsg = execErr instanceof Error ? execErr.message : String(execErr);
+          console.error(`[execute:${actionType}] Error:`, errMsg);
+          output = { label, actionType, message: `Action ${actionType} failed: ${errMsg}`, error: true };
         }
 
         await prisma.nodeRun.create({
