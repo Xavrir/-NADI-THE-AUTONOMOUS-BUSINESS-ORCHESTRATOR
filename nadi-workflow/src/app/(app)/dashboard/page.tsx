@@ -224,25 +224,27 @@ export default function DashboardPage() {
             <div className="glow-orb bg-[var(--success)]" />
           </div>
 
-          <div className="group card-elevated relative overflow-hidden p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${(kpis?.pendingApprovals ?? 0) > 0 ? "bg-amber-500/10" : "bg-white/5"}`}>
-                  <Bell className={`h-3.5 w-3.5 ${(kpis?.pendingApprovals ?? 0) > 0 ? "text-[var(--warning)]" : "text-[var(--text-muted)]"}`} />
+          <Link href="/inbox" className="block">
+            <div className="group card-elevated relative overflow-hidden p-5 space-y-2 transition-all hover:border-[var(--warning)] hover:shadow-[3px_3px_0px_0px_color-mix(in_srgb,var(--warning)_20%,transparent)] cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                  <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${(kpis?.pendingApprovals ?? 0) > 0 ? "bg-amber-500/10" : "bg-white/5"}`}>
+                    <Bell className={`h-3.5 w-3.5 ${(kpis?.pendingApprovals ?? 0) > 0 ? "text-[var(--warning)]" : "text-[var(--text-muted)]"}`} />
+                  </div>
+                  Pending Approvals
                 </div>
-                Pending Approvals
+                {(kpis?.pendingApprovals ?? 0) > 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-[var(--warning)]">
+                    <AlertTriangle className="h-2.5 w-2.5" />Action
+                  </span>
+                )}
               </div>
-              {(kpis?.pendingApprovals ?? 0) > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-[var(--warning)]">
-                  <AlertTriangle className="h-2.5 w-2.5" />Action
-                </span>
-              )}
+              <p className={`font-mono text-2xl font-bold ${(kpis?.pendingApprovals ?? 0) > 0 ? "text-[var(--warning)]" : "text-[var(--text-primary)]"}`}>
+                {kpis?.pendingApprovals ?? 0}
+              </p>
+              <div className={`glow-orb ${(kpis?.pendingApprovals ?? 0) > 0 ? "bg-[var(--warning)]" : "bg-white/20"}`} />
             </div>
-            <p className={`font-mono text-2xl font-bold ${(kpis?.pendingApprovals ?? 0) > 0 ? "text-[var(--warning)]" : "text-[var(--text-primary)]"}`}>
-              {kpis?.pendingApprovals ?? 0}
-            </p>
-            <div className={`glow-orb ${(kpis?.pendingApprovals ?? 0) > 0 ? "bg-[var(--warning)]" : "bg-white/20"}`} />
-          </div>
+          </Link>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">

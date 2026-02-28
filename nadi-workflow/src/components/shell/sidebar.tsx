@@ -42,16 +42,17 @@ const navItems: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState<{ name: string; email: string } | null>(() => {
-    if (typeof window !== "undefined") {
-      const cached = sessionStorage.getItem("nadi_user");
-      if (cached) return JSON.parse(cached);
-    }
-    return null;
-  });
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
 
   useEffect(() => {
-    if (user) return;
+    // Try sessionStorage first for instant display
+    const cached = sessionStorage.getItem("nadi_user");
+    if (cached) {
+      try {
+        setUser(JSON.parse(cached));
+        return;
+      } catch { /* fall through to fetch */ }
+    }
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((d) => {
@@ -61,7 +62,7 @@ export function Sidebar() {
         }
       })
       .catch(() => {});
-  }, [user]);
+  }, []);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });

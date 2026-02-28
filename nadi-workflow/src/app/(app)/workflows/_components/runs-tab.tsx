@@ -155,14 +155,14 @@ export function RunsTab() {
 
       {/* Run Detail Dialog */}
       <Dialog open={selectedRun !== null} onOpenChange={(open) => !open && setSelectedRun(null)}>
-        <DialogContent className="max-w-lg border-[var(--border)] bg-[var(--surface)]">
+        <DialogContent className="max-w-lg max-h-[85vh] border-[var(--border)] bg-[var(--surface)]">
           <DialogHeader>
             <DialogTitle className="font-display text-lg font-bold text-[var(--text-primary)]">
               Run Detail
             </DialogTitle>
           </DialogHeader>
           {selectedRun && (
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-y-auto max-h-[calc(85vh-8rem)] pr-1">
               {/* Run info */}
               <div className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
                 <div>

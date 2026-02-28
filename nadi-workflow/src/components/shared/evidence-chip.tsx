@@ -13,7 +13,9 @@ interface EvidenceChipProps {
 export function EvidenceChip({ evidenceId, variant = "chip", className }: EvidenceChipProps) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = useCallback(async () => {
+  const handleCopy = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     await navigator.clipboard.writeText(evidenceId);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);

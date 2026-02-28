@@ -109,7 +109,12 @@ export function CsvImportWizard() {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="gap-2"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Upload className="h-4 w-4" />
           Import CSV
         </Button>
