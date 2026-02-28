@@ -712,8 +712,10 @@ export function getExecutor(
         const updates: Partial<WorkflowState> = { data: {}, nodesCompleted: 1 };
 
         try {
+        console.log(`[execute] actionType="${actionType}" (type=${typeof actionType}) for node=${id} run=${state.runId}`);
         switch (actionType) {
           case "post_ledger_entries": {
+            console.log(`[execute] ENTERING post_ledger_entries case`);
             const desc = (state.data.description as string) ?? "Imported transaction";
             const debit = (state.data.debit as number) ?? 0;
             const credit = (state.data.credit as number) ?? 0;
@@ -990,6 +992,7 @@ export function getExecutor(
           }
 
           default: {
+            console.log(`[execute] HIT DEFAULT case for actionType="${actionType}"`);
             output = { label, actionType, message: `Action executed: ${actionType}`, affectedRecords: 1 };
           }
         }

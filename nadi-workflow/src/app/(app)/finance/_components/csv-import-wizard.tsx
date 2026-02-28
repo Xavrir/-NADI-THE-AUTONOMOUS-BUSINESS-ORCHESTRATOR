@@ -172,8 +172,8 @@ export function CsvImportWizard() {
               </Button>
             </div>
 
-            <div className="max-h-64 overflow-auto rounded-lg border border-[var(--border)]">
-              <table className="min-w-full text-xs">
+            <div className="max-h-64 overflow-x-auto overflow-y-auto rounded-lg border border-[var(--border)]">
+              <table className="w-full table-fixed text-xs">
                 <thead>
                   <tr className="border-b border-[var(--border)] bg-[var(--card)]">
                     {headers.map((h) => (
@@ -190,7 +190,7 @@ export function CsvImportWizard() {
                   {rows.slice(0, 10).map((row, i) => (
                     <tr key={i} className="border-b border-[var(--border)] even:bg-[var(--card)]/50">
                       {headers.map((h) => (
-                        <td key={h} className="whitespace-nowrap px-3 py-1.5 text-[var(--text-secondary)]">
+                        <td key={h} className="overflow-hidden truncate px-3 py-1.5 text-[var(--text-secondary)]">
                           {row[h] || "—"}
                         </td>
                       ))}
